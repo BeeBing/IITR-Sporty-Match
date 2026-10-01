@@ -68,3 +68,38 @@ test('match validation enforces format sizes and host gender rules', () => {
   assert.equal(sides.values.capacity, 10, 'sides formats ignore the submitted capacity');
   assert.equal(sides.values.team_size, 5);
 });
+
+test('Brevo mailer sends through the HTTPS API with the configured sender', async () => {
+  const { createMailer, parseAddress } = require('../src/mailer');
+  assert.deepEqual(parseAddress('IITR Sporty Match <hello@example.com>'), { name: 'IITR Sporty Match', email: 'hello@example.com' });
+  assert.deepEqual(parseAddress('hello@example.com'), { email: 'hello@example.com' });
+
+  const calls = [];
+  const realFetch = global.fetch;
+  global.fetch = async (url, opts) => {
+    calls.push({ url, opts });
+    return new Response('{"messageId":"x"}', { status: 201 });
+  };
+  try {
+    const mailer = createMailer({ BREVO_API_KEY: 'xkeysib-test', MAIL_FROM: 'IITR Sporty Match <hello@example.com>' });
+    assert.equal(mailer.enabled, true);
+    assert.equal(mailer.provider, 'brevo');
+    await mailer.send({ to: 'a@iitr.ac.in', subject: 'Hi', text: 'plain', html: '<b>hi</b>' });
+    assert.equal(calls[0].url, 'https://api.brevo.com/v3/smtp/email');
+    assert.equal(calls[0].opts.headers['api-key'], 'xkeysib-test');
+    assert.deepEqual(JSON.parse(calls[0].opts.body), {
+      sender: { name: 'IITR Sporty Match', email: 'hello@example.com' },
+      to: [{ email: 'a@iitr.ac.in' }],
+      subject: 'Hi',
+      textContent: 'plain',
+      htmlContent: '<b>hi</b>',
+    });
+
+    global.fetch = async () => new Response('{"message":"unauthorized"}', { status: 401 });
+    await assert.rejects(mailer.send({ to: 'a@iitr.ac.in', subject: 'Hi', text: 'x' }), /Brevo responded 401/);
+  } finally {
+    global.fetch = realFetch;
+  }
+  assert.equal(createMailer({ BREVO_API_KEY: 'k' }).enabled, false, 'needs MAIL_FROM too');
+  assert.equal(createMailer({}).enabled, false);
+});

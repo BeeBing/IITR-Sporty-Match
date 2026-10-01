@@ -189,3 +189,11 @@ test('group formats let the host choose the size', async () => {
   const page = await host.get(`/matches/${id}`);
   assert.match(page.text, /Waiting for 2 more players/);
 });
+
+test('without email set up, login is password-only', async () => {
+  const c = app.client();
+  const page = await c.get('/login');
+  assert.doesNotMatch(page.text, /Email me a login code/);
+  const res = await c.post('/login/code', { email: 'someone@iitr.ac.in' });
+  assert.equal(res.url, '/login');
+});

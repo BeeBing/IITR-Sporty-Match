@@ -1,20 +1,26 @@
 <%- include('partials/head') %>
 <div class="narrow">
   <h1>Welcome back</h1>
-  <form method="post" action="/login" class="card form">
-    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
-    <input type="hidden" name="next" value="<%= next %>">
-    <% if (error) { %><p class="err err-box"><%= error %></p><% } %>
-    <div class="field">
-      <label for="email">IITR email</label>
-      <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required value="<%= email %>">
-    </div>
-    <div class="field">
-      <label for="password">Password</label>
-      <input id="password" name="password" type="password" autocomplete="current-password" required>
-    </div>
-    <button class="btn btn-lg btn-block" type="submit">Log in</button>
-    <p class="muted center"><a href="/forgot">Forgot password?</a> · New here? <a href="/signup">Sign up</a></p>
-  </form>
+  <% if (mailEnabled) { %>
+    <form method="post" action="/login/code" class="card form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="next" value="<%= next %>">
+      <% if (codeError) { %><p class="err err-box"><%= codeError %></p><% } %>
+      <div class="field">
+        <label for="code-email">IITR email</label>
+        <input id="code-email" name="email" type="email" autocomplete="email" inputmode="email" required placeholder="yourname@xx.<%= emailDomain %>" value="<%= email %>">
+        <p class="hint">We’ll email you a 6-digit code. No password needed.</p>
+      </div>
+      <button class="btn btn-lg btn-block" type="submit">Email me a login code</button>
+    </form>
+
+    <details class="alt-login" <%= error ? 'open' : '' %>>
+      <summary>Log in with your password instead</summary>
+      <%- include('partials/password-login') %>
+    </details>
+  <% } else { %>
+    <%- include('partials/password-login') %>
+  <% } %>
+  <p class="muted center">New here? <a href="/signup">Sign up</a></p>
 </div>
 <%- include('partials/foot') %>

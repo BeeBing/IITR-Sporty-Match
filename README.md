@@ -26,7 +26,7 @@ Matchmaking for sports at IIT Roorkee. Post a match, wait for people to tap **â€
 - **Notifications** when someone joins or leaves your match, when it fills ("Game on!"), when it's cancelled, on new chat messages, and when someone posts a match in a sport you play.
 - **Profile** with sports and a self-rated level for each, which teammates see on the match page.
 - **Profile photo** picked from the phone's gallery or camera, cropped to a circle in the browser (drag, pinch or slider to zoom). The server re-encodes it to a small WebP, which strips hidden metadata such as GPS location. Photos are stored in Postgres and only shown to signed-in students.
-- **Optional email** (set `SMTP_URL`). It turns on 6-digit email verification at sign-up, password reset, and a "your match is full" email.
+- **Email login codes** (needs email set up). Students log in with a 6-digit code sent to their IITR inbox; password login stays as a fallback. Email also turns on verification at sign-up, password reset, and a "your match is full" email.
 
 ## Running locally
 
@@ -58,11 +58,12 @@ The test suite wipes the test database on every run.
 | `DATABASE_URL` | yes | Use the database's **internal** URL |
 | `SESSION_SECRET` | yes | Any long random string |
 | `NODE_ENV` | yes | `production` |
-| `SMTP_URL` | no | e.g. `smtps://user:app-password@smtp.gmail.com:465`. Turns on email verification and reset |
-| `MAIL_FROM` | no | Sender shown on emails |
+| `BREVO_API_KEY` | no | Brevo API key. Turns on login codes, email verification and password reset |
+| `MAIL_FROM` | with Brevo | Sender, e.g. `IITR Sporty Match <hello@yourdomain.in>`; must be a sender verified in Brevo |
+| `SMTP_URL` | no | Alternative to Brevo on paid plans or locally. Render's free plan blocks outbound SMTP |
 | `ALLOWED_EMAIL_DOMAIN` | no | Defaults to `iitr.ac.in` |
 
-Without `SMTP_URL`, accounts are trusted at sign-up: the email format is checked, but nobody proves they own the inbox. Configure SMTP before sharing the app widely.
+Without email set up, accounts are trusted at sign-up: the email format is checked, but nobody proves they own the inbox, and login is password-only. Set up email before sharing the app widely. For reliable delivery to IITR inboxes, send from your own domain authenticated in Brevo; Gmail addresses can't be authenticated as senders.
 
 ## Customising
 

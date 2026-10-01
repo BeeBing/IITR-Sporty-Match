@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS user_sports (
 );
 CREATE INDEX IF NOT EXISTS user_sports_sport_idx ON user_sports (sport);
 
--- One-time codes for email verification and password reset.
+-- One-time codes for email verification, login and password reset.
 CREATE TABLE IF NOT EXISTS email_codes (
   user_id    INT  NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  purpose    TEXT NOT NULL CHECK (purpose IN ('verify', 'reset')),
+  purpose    TEXT NOT NULL,
   code_hash  TEXT NOT NULL,
   attempts   INT  NOT NULL DEFAULT 0,
   expires_at TIMESTAMPTZ NOT NULL,
@@ -94,3 +94,7 @@ CREATE TABLE IF NOT EXISTS avatars (
   image      BYTEA NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Login codes. The purpose check is (re)declared here so databases created before it update too.
+ALTER TABLE email_codes DROP CONSTRAINT IF EXISTS email_codes_purpose_check;
+ALTER TABLE email_codes ADD CONSTRAINT email_codes_purpose_check CHECK (purpose IN ('verify', 'reset', 'login'));

@@ -117,6 +117,10 @@ async function issueCode(pool, userId, purpose) {
   return code;
 }
 
+async function clearCode(pool, userId, purpose) {
+  await pool.query('DELETE FROM email_codes WHERE user_id = $1 AND purpose = $2', [userId, purpose]);
+}
+
 async function consumeCode(pool, userId, purpose, code) {
   const { rows: [row] } = await pool.query(
     'SELECT * FROM email_codes WHERE user_id = $1 AND purpose = $2',
@@ -133,5 +137,5 @@ async function consumeCode(pool, userId, purpose, code) {
 }
 
 module.exports = {
-  create, authenticate, byId, byEmail, sports, updateProfile, setPassword, markVerified, issueCode, consumeCode, CODE_TTL_MIN,
+  create, authenticate, byId, byEmail, sports, updateProfile, setPassword, markVerified, issueCode, clearCode, consumeCode, CODE_TTL_MIN,
 };

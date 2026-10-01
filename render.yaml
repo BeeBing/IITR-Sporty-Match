@@ -17,8 +17,9 @@ services:
           property: connectionString
       - key: SESSION_SECRET
         generateValue: true
-      # Optional: turns on email verification, password reset and "match full" emails.
-      - key: SMTP_URL
+      # Optional: turns on login codes, email verification, password reset and "match full" emails.
+      # The free plan blocks SMTP, so email goes through Brevo's HTTPS API.
+      - key: BREVO_API_KEY
         sync: false
       - key: MAIL_FROM
         sync: false

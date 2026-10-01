@@ -350,3 +350,10 @@ img.avatar { object-fit: cover; background: var(--surface-2); padding: 0; }
 .crop-zoom { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--muted); }
 .crop-zoom input { flex: 1; accent-color: var(--brand); }
 .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+
+/* Login: code first, password as an alternative */
+.alt-login { margin: 4px 0 12px; }
+.alt-login > summary { cursor: pointer; text-align: center; color: var(--brand); font-weight: 600; padding: 8px; list-style: none; }
+.alt-login > summary::-webkit-details-marker { display: none; }
+.alt-login[open] > summary { color: var(--muted); }
+.alt-login > .form { margin-top: 4px; }

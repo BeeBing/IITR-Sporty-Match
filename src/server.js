@@ -12,7 +12,8 @@ async function main() {
   const pool = createPool();
   await migrate(pool);
   const mailer = createMailer();
-  if (!mailer.enabled) console.warn('SMTP_URL not set: email verification and password reset are off.');
+  if (mailer.enabled) console.log(`Email on (${mailer.provider}): verification, login codes and password reset.`);
+  else console.warn('Email is off (set BREVO_API_KEY and MAIL_FROM): no verification, login codes or password reset.');
 
   const app = createApp({ pool, mailer, sessionSecret: sessionSecret || 'dev-only-secret', production });
   const port = Number(process.env.PORT) || 3000;

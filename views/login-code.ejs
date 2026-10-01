@@ -1,0 +1,24 @@
+<%- include('partials/head') %>
+<div class="narrow">
+  <h1>Check your inbox</h1>
+  <p class="muted">If <b><%= email %></b> has an account, we’ve sent it a 6-digit code. It expires in 15 minutes. Check spam if you don’t see it.</p>
+  <form method="post" action="/login/code/verify" class="card form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <input type="hidden" name="email" value="<%= email %>">
+    <input type="hidden" name="next" value="<%= next %>">
+    <% if (error) { %><p class="err err-box"><%= error %></p><% } %>
+    <div class="field">
+      <label for="code">Login code</label>
+      <input id="code" name="code" class="code-input" inputmode="numeric" autocomplete="one-time-code" pattern="\d{6}" maxlength="6" required autofocus>
+    </div>
+    <button class="btn btn-lg btn-block" type="submit">Log in</button>
+  </form>
+  <form method="post" action="/login/code" class="center">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <input type="hidden" name="email" value="<%= email %>">
+    <input type="hidden" name="next" value="<%= next %>">
+    <button class="linkish" type="submit">Send a new code</button>
+  </form>
+  <p class="muted center"><a href="/login">Use a different email</a> · No account? <a href="/signup">Sign up</a></p>
+</div>
+<%- include('partials/foot') %>

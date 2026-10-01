@@ -1,12 +1,40 @@
 <%- include('partials/head') %>
 <div class="narrow">
   <div class="profile-head">
-    <span class="avatar avatar-lg" aria-hidden="true"><%= initials(currentUser.name) %></span>
+    <div class="photo-edit">
+      <%- include('partials/avatar', { u: currentUser, size: 'xl' }) %>
+      <label class="photo-edit-btn" for="photo-input" title="Change photo"><span aria-hidden="true">📷</span><span class="sr-only">Change profile photo</span></label>
+    </div>
     <div>
       <h1><%= currentUser.name %></h1>
       <p class="muted"><%= currentUser.email %> · <%= currentUser.enrollment_no %></p>
+      <div class="photo-actions">
+        <label class="btn btn-sm" for="photo-input"><%= currentUser.avatar_token ? 'Change photo' : 'Add a photo' %></label>
+        <% if (currentUser.avatar_token) { %>
+          <form method="post" action="/profile/photo/delete" data-confirm="Remove your profile photo?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+            <button class="btn btn-sm btn-ghost" type="submit">Remove</button>
+          </form>
+        <% } %>
+      </div>
+      <noscript><p class="hint">Turn on JavaScript to add a photo.</p></noscript>
     </div>
   </div>
+  <input id="photo-input" type="file" accept="image/*" hidden data-csrf="<%= csrfToken() %>">
+
+  <dialog class="photo-dialog" id="photo-dialog" aria-labelledby="photo-dialog-title">
+    <h2 id="photo-dialog-title">Position your photo</h2>
+    <p class="hint">Drag to move, use the slider to zoom.</p>
+    <div class="crop-stage">
+      <canvas id="crop-canvas" width="600" height="600" aria-label="Photo preview"></canvas>
+    </div>
+    <label class="crop-zoom"><span aria-hidden="true">−</span><input id="crop-zoom" type="range" min="1" max="4" step="0.01" value="1" aria-label="Zoom"><span aria-hidden="true">＋</span></label>
+    <p class="err" id="photo-error" hidden></p>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" type="button" data-photo-cancel>Cancel</button>
+      <button class="btn" type="button" data-photo-save>Save photo</button>
+    </div>
+  </dialog>
 
   <form method="post" action="/profile" class="card form">
     <input type="hidden" name="_csrf" value="<%= csrfToken() %>">

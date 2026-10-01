@@ -33,17 +33,26 @@ function csrf(req, res, next) {
   const sent = Buffer.from(String((req.body && req.body._csrf) || req.get('x-csrf-token') || ''));
   const expected = Buffer.from(String(req.session.csrf || ''));
   if (!expected.length || sent.length !== expected.length || !crypto.timingSafeEqual(sent, expected)) {
-    res.status(403);
-    return res.render('error', { title: 'Session expired', message: 'Your session expired. Go back, refresh the page and try again.' });
+    const message = 'Your session expired. Refresh the page and try again.';
+    if (req.get('x-requested-with') === 'fetch') return res.status(403).json({ ok: false, error: message });
+    return res.status(403).render('error', { title: 'Session expired', message });
   }
   next();
 }
 
+// One-time messages shown on the next full page. They're taken when a page renders, so
+// image loads and background polling can't swallow them first.
 function flash(req, res, next) {
-  res.locals.flash = req.session.flash || null;
-  if (req.session.flash) delete req.session.flash;
   req.flash = (type, msg) => {
     req.session.flash = { type, msg };
+  };
+  const render = res.render.bind(res);
+  res.render = (...args) => {
+    if (req.session.flash && req.get('x-requested-with') !== 'fetch') {
+      res.locals.flash = req.session.flash;
+      delete req.session.flash;
+    }
+    return render(...args);
   };
   next();
 }

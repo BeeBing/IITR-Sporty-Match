@@ -319,3 +319,34 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, .btn:focus-vi
 .empty-emoji { font-size: 2.6rem; }
 .footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 24px 16px 32px; }
 .footer p { margin: 0 0 6px; }
+
+/* Profile photos */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+img.avatar { object-fit: cover; background: var(--surface-2); padding: 0; }
+.avatar-xs { width: 18px; height: 18px; font-size: 0.55rem; }
+.avatar-xl { width: 96px; height: 96px; font-size: 2rem; }
+.tag-host { display: inline-flex; align-items: center; gap: 5px; padding-left: 3px; }
+.tabs a .ico-avatar { width: 26px; height: 26px; font-size: 0.65rem; }
+@media (min-width: 760px) { .tabs a .ico-avatar { width: 22px; height: 22px; } }
+.profile-head { flex-wrap: wrap; }
+.photo-edit { position: relative; flex: none; }
+.photo-edit-btn {
+  position: absolute; right: -2px; bottom: -2px; width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer; font-size: 1rem;
+  background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.photo-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.photo-actions form { margin: 0; }
+.photo-dialog {
+  border: 0; border-radius: 18px; padding: 18px; width: min(380px, calc(100vw - 32px));
+  background: var(--surface); color: var(--text); box-shadow: 0 20px 60px rgb(0 0 0 / 35%);
+}
+.photo-dialog::backdrop { background: rgb(0 0 0 / 55%); }
+.photo-dialog h2 { margin: 0 0 2px; }
+.crop-stage { position: relative; margin: 14px auto 10px; width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #000; }
+.crop-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.crop-stage canvas:active { cursor: grabbing; }
+.crop-stage::after { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 999px rgb(0 0 0 / 55%); pointer-events: none; outline: 2px solid rgb(255 255 255 / 85%); }
+.crop-zoom { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--muted); }
+.crop-zoom input { flex: 1; accent-color: var(--brand); }
+.dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }

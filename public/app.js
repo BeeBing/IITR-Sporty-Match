@@ -108,6 +108,161 @@
     });
   }
 
+  // Profile photo: pick from the gallery or camera, crop to a circle in the browser,
+  // then upload a small JPEG. The server re-encodes it and strips metadata.
+  const photoInput = $('#photo-input');
+  const photoDialog = $('#photo-dialog');
+  if (photoInput && photoDialog) {
+    const canvas = $('#crop-canvas', photoDialog);
+    const ctx = canvas.getContext('2d');
+    const zoom = $('#crop-zoom', photoDialog);
+    const errorEl = $('#photo-error', photoDialog);
+    const saveBtn = $('[data-photo-save]', photoDialog);
+    const S = canvas.width;
+    const OUT = 512;
+    let img = null;
+    let objectUrl = null;
+    let base = 1; // scale at which the image just covers the square
+    let scale = 1;
+    let x = 0; // image top-left, in canvas pixels
+    let y = 0;
+
+    const showError = (msg) => {
+      errorEl.textContent = msg;
+      errorEl.hidden = !msg;
+    };
+    const clamp = () => {
+      x = Math.min(0, Math.max(S - img.naturalWidth * scale, x));
+      y = Math.min(0, Math.max(S - img.naturalHeight * scale, y));
+    };
+    const draw = () => {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, S, S);
+      ctx.drawImage(img, x, y, img.naturalWidth * scale, img.naturalHeight * scale);
+    };
+    const setScale = (next, cx = S / 2, cy = S / 2) => {
+      next = Math.min(base * 4, Math.max(base, next));
+      x = cx - ((cx - x) * next) / scale;
+      y = cy - ((cy - y) * next) / scale;
+      scale = next;
+      zoom.value = String(scale / base);
+      clamp();
+      draw();
+    };
+    const close = () => {
+      photoDialog.close();
+      photoInput.value = '';
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+    };
+
+    photoInput.addEventListener('change', () => {
+      const file = photoInput.files[0];
+      if (!file) return;
+      showError('');
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        img = image;
+        base = Math.max(S / img.naturalWidth, S / img.naturalHeight);
+        scale = base;
+        x = (S - img.naturalWidth * scale) / 2;
+        y = (S - img.naturalHeight * scale) / 2;
+        zoom.value = '1';
+        draw();
+        if (!photoDialog.open) photoDialog.showModal();
+      };
+      image.onerror = () => {
+        window.alert('Couldn’t open that image. Try a JPG or PNG photo.');
+        photoInput.value = '';
+      };
+      image.src = objectUrl;
+    });
+
+    zoom.addEventListener('input', () => { if (img) setScale(base * Number(zoom.value)); });
+
+    // Drag with one finger or the mouse; pinch with two fingers.
+    const pointers = new Map();
+    let last = null;
+    const toCanvas = (e) => {
+      const r = canvas.getBoundingClientRect();
+      return { px: ((e.clientX - r.left) * S) / r.width, py: ((e.clientY - r.top) * S) / r.height };
+    };
+    canvas.addEventListener('pointerdown', (e) => {
+      canvas.setPointerCapture(e.pointerId);
+      pointers.set(e.pointerId, toCanvas(e));
+      last = null;
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!img || !pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, toCanvas(e));
+      const pts = [...pointers.values()];
+      if (pts.length === 1) {
+        const p = pts[0];
+        if (last && last.n === 1) {
+          x += p.px - last.px;
+          y += p.py - last.py;
+          clamp();
+          draw();
+        }
+        last = { n: 1, px: p.px, py: p.py };
+      } else {
+        const [a, b] = pts;
+        const dist = Math.hypot(a.px - b.px, a.py - b.py);
+        const mid = { px: (a.px + b.px) / 2, py: (a.py + b.py) / 2 };
+        if (last && last.n === 2) setScale((scale * dist) / last.dist, mid.px, mid.py);
+        last = { n: 2, dist };
+      }
+    });
+    const lift = (e) => {
+      pointers.delete(e.pointerId);
+      last = null;
+    };
+    canvas.addEventListener('pointerup', lift);
+    canvas.addEventListener('pointercancel', lift);
+    canvas.addEventListener('wheel', (e) => {
+      if (!img) return;
+      e.preventDefault();
+      const p = toCanvas(e);
+      setScale(scale * (e.deltaY < 0 ? 1.08 : 1 / 1.08), p.px, p.py);
+    }, { passive: false });
+
+    $('[data-photo-cancel]', photoDialog).addEventListener('click', close);
+    photoDialog.addEventListener('cancel', () => { photoInput.value = ''; });
+
+    saveBtn.addEventListener('click', async () => {
+      if (!img) return;
+      showError('');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+      try {
+        const out = document.createElement('canvas');
+        out.width = OUT;
+        out.height = OUT;
+        const k = OUT / S;
+        const octx = out.getContext('2d');
+        octx.fillStyle = '#fff';
+        octx.fillRect(0, 0, OUT, OUT);
+        octx.drawImage(img, x * k, y * k, img.naturalWidth * scale * k, img.naturalHeight * scale * k);
+        const blob = await new Promise((resolve) => out.toBlob(resolve, 'image/jpeg', 0.9));
+        if (!blob) throw new Error('Couldn’t prepare that photo. Try another one.');
+        const res = await fetch('/profile/photo', {
+          method: 'POST',
+          headers: { 'content-type': 'image/jpeg', 'x-csrf-token': photoInput.dataset.csrf, 'x-requested-with': 'fetch' },
+          body: blob,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Upload failed. Check your connection and try again.');
+        window.location.assign(window.location.pathname);
+      } catch (err) {
+        showError(err.message);
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save photo';
+      }
+    });
+  }
+
   // Host form: formats, player counts and venue hints follow the chosen sport.
   const form = $('#match-form');
   const dataEl = $('#sports-data');

@@ -1,5 +1,5 @@
 <li class="slot slot-player">
-  <span class="avatar" aria-hidden="true"><%= initials(p.name) %></span>
+  <%- include('../partials/avatar', { u: { id: p.user_id, name: p.name, avatar_token: p.avatar_token } }) %>
   <span class="who">
     <span class="who-name">
       <b><%= p.name %></b>

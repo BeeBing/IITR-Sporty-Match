@@ -25,6 +25,7 @@ Matchmaking for sports at IIT Roorkee. Post a match, wait for people to tap **â€
 - **Live match page.** The roster refreshes on its own. Players in the match can see each other's email and WhatsApp, and get a private match chat, WhatsApp share, and add-to-calendar.
 - **Notifications** when someone joins or leaves your match, when it fills ("Game on!"), when it's cancelled, on new chat messages, and when someone posts a match in a sport you play.
 - **Profile** with sports and a self-rated level for each, which teammates see on the match page.
+- **Profile photo** picked from the phone's gallery or camera, cropped to a circle in the browser (drag, pinch or slider to zoom). The server re-encodes it to a small WebP, which strips hidden metadata such as GPS location. Photos are stored in Postgres and only shown to signed-in students.
 - **Optional email** (set `SMTP_URL`). It turns on 6-digit email verification at sign-up, password reset, and a "your match is full" email.
 
 ## Running locally

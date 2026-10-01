@@ -85,6 +85,26 @@ class Client {
     return this.request('GET', path);
   }
 
+  // Sends a raw body the way the in-page photo uploader does.
+  async upload(path, body, contentType, { csrf = this.csrf } = {}) {
+    const res = await fetch(this.base + path, {
+      method: 'POST',
+      body,
+      headers: {
+        cookie: this.cookieHeader(),
+        'content-type': contentType,
+        'x-requested-with': 'fetch',
+        ...(csrf && { 'x-csrf-token': csrf }),
+      },
+    });
+    return { status: res.status, json: await res.json().catch(() => null) };
+  }
+
+  async getBuffer(path) {
+    const res = await fetch(this.base + path, { redirect: 'manual', headers: { cookie: this.cookieHeader() } });
+    return { status: res.status, headers: res.headers, body: Buffer.from(await res.arrayBuffer()) };
+  }
+
   async post(path, form = {}) {
     if (!this.csrf) await this.get('/login');
     return this.request('POST', path, { _csrf: this.csrf, ...form });

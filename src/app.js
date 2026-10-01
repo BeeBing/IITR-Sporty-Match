@@ -17,7 +17,13 @@ function createApp({ pool, mailer, sessionSecret, production = false }) {
   app.disable('x-powered-by');
 
   app.use(helmet({
-    contentSecurityPolicy: { directives: { upgradeInsecureRequests: production ? [] : null } },
+    contentSecurityPolicy: {
+      directives: {
+        upgradeInsecureRequests: production ? [] : null,
+        // blob: lets the photo cropper preview a picked image before uploading it.
+        imgSrc: ["'self'", 'data:', 'blob:'],
+      },
+    },
   }));
   app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: production ? '1h' : 0 }));
 
@@ -79,9 +85,12 @@ function createApp({ pool, mailer, sessionSecret, production = false }) {
   app.use((err, req, res, next) => {
     const status = err.expose ? err.status || 400 : 500;
     if (status >= 500) console.error(err);
+    let message = err.expose ? err.message : 'Something broke on our side. Try again in a moment.';
+    if (err.type === 'entity.too.large') message = 'That file is too large.';
+    if (req.get('x-requested-with') === 'fetch') return res.status(status).json({ ok: false, error: message });
     res.status(status).render('error', {
       title: status === 404 ? 'Not found' : 'Something went wrong',
-      message: err.expose ? err.message : 'Something broke on our side. Try again in a moment.',
+      message,
     });
   });
 

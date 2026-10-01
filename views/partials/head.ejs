@@ -23,7 +23,9 @@
         <a href="/matches" class="<%= path === '/matches' ? 'active' : '' %>"><span class="ico" aria-hidden="true">🔎</span>Find</a>
         <a href="/matches/new" class="tab-host <%= path === '/matches/new' ? 'active' : '' %>"><span class="ico" aria-hidden="true">＋</span>Host</a>
         <a href="/me/matches" class="<%= path === '/me/matches' ? 'active' : '' %>"><span class="ico" aria-hidden="true">📅</span>My games</a>
-        <a href="/profile" class="<%= path === '/profile' ? 'active' : '' %>"><span class="ico" aria-hidden="true">👤</span>Profile</a>
+        <a href="/profile" class="<%= path === '/profile' ? 'active' : '' %>">
+          <% if (currentUser.avatar_token) { %><%- include('avatar', { u: currentUser, extraClass: 'ico ico-avatar' }) %><% } else { %><span class="ico" aria-hidden="true">👤</span><% } %>Profile
+        </a>
       </nav>
       <a class="bell" href="/notifications" aria-label="Notifications">
         <span aria-hidden="true">🔔</span>

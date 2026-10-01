@@ -10,7 +10,7 @@ const MAX_HOSTED_UPCOMING = 5;
 
 // $1 is always the viewer's user id.
 const BASE = `
-  SELECT m.*, h.name AS host_name,
+  SELECT m.*, h.name AS host_name, h.avatar_token AS host_avatar_token,
          pc.n AS player_count,
          (m.capacity - m.guests - pc.n)::int AS spots_left,
          m.starts_at + make_interval(mins => m.duration_min) AS ends_at,
@@ -117,7 +117,7 @@ async function get(pool, id, viewer) {
   const { rows: [match] } = await pool.query(`SELECT * FROM (${BASE}) m WHERE m.id = $2`, [viewer.id, id]);
   if (!match) throw new UserError('That match does not exist.', 404);
   const { rows: players } = await pool.query(
-    `SELECT p.user_id, p.team, p.joined_at, u.name, u.department, u.year, u.gender, u.email, u.phone, us.skill
+    `SELECT p.user_id, p.team, p.joined_at, u.name, u.department, u.year, u.gender, u.email, u.phone, u.avatar_token, us.skill
      FROM match_players p
      JOIN users u ON u.id = p.user_id
      LEFT JOIN user_sports us ON us.user_id = p.user_id AND us.sport = $2

@@ -2,6 +2,7 @@
 
 const express = require('express');
 const users = require('../services/users');
+const avatars = require('../services/avatars');
 const matches = require('../services/matches');
 const { unreadCount } = require('../services/notify');
 const { validateProfile, validateSkills } = require('../validation');
@@ -74,6 +75,32 @@ module.exports = function accountRoutes({ pool, requireAuth }) {
     }
     req.flash('success', 'Password changed.');
     res.redirect('/profile');
+  });
+
+  // The profile page crops the photo in the browser and uploads it as the raw request body.
+  const photoBody = express.raw({ type: 'image/*', limit: '6mb' });
+
+  r.post('/profile/photo', requireAuth, photoBody, async (req, res) => {
+    await avatars.save(pool, req.user.id, req.body);
+    req.flash('success', 'Profile photo updated.');
+    if (req.get('x-requested-with') === 'fetch') return res.json({ ok: true });
+    res.redirect('/profile');
+  });
+
+  r.post('/profile/photo/delete', requireAuth, async (req, res) => {
+    await avatars.remove(pool, req.user.id);
+    req.flash('success', 'Profile photo removed.');
+    res.redirect('/profile');
+  });
+
+  // Photos are only visible to signed-in students. URLs carry ?v=<avatar_token>, so a new
+  // upload gets a new URL and old ones can be cached indefinitely.
+  r.get('/avatars/:id', requireAuth, async (req, res) => {
+    const id = Number(req.params.id);
+    const image = Number.isInteger(id) && id > 0 && id <= 2147483647 ? await avatars.get(pool, id) : null;
+    if (!image) return res.status(404).end();
+    res.set({ 'Content-Type': 'image/webp', 'Cache-Control': 'private, max-age=31536000, immutable' });
+    res.send(image);
   });
 
   r.get('/notifications', requireAuth, async (req, res) => {

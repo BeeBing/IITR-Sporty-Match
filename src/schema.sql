@@ -85,3 +85,12 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS notifications_user_idx ON notifications (user_id, created_at DESC);
+
+-- Profile photos. Kept out of `users` so the per-request user lookup never loads image bytes.
+-- `avatar_token` changes on every upload and versions the image URL, so browsers can cache forever.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_token TEXT;
+CREATE TABLE IF NOT EXISTS avatars (
+  user_id    INT   PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  image      BYTEA NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

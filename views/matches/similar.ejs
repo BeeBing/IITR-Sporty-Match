@@ -1,0 +1,25 @@
+<%- include('../partials/head') %>
+<h1>Join one of these instead?</h1>
+<p class="muted">These <%= getSport(similar[0].sport).name %> games around the same time are still looking for players. Joining one fills up faster than starting a new one.</p>
+
+<div class="list">
+  <% for (const m of similar) { %>
+    <div class="similar-row">
+      <%- include('../partials/match-card', { m }) %>
+      <form method="post" action="/matches/<%= m.id %>/join">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn" type="submit">I’m in</button>
+      </form>
+    </div>
+  <% } %>
+</div>
+
+<form method="post" action="/matches" class="center similar-skip">
+  <% for (const [k, v] of Object.entries(body)) { if (k === '_csrf' || k === 'force') continue; %>
+    <input type="hidden" name="<%= k %>" value="<%= v %>">
+  <% } %>
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <input type="hidden" name="force" value="1">
+  <button class="btn btn-ghost" type="submit">No thanks, post my match</button>
+</form>
+<%- include('../partials/foot') %>

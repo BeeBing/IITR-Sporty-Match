@@ -1,0 +1,15 @@
+<% const isOther = values.department && !DEPARTMENTS.includes(values.department); %>
+<div class="field">
+  <label for="department">Department or centre</label>
+  <select id="department" name="department" required data-other-toggle="department_other_wrap">
+    <option value="">Choose…</option>
+    <% for (const d of DEPARTMENTS) { %>
+      <option value="<%= d %>" <%= values.department === d ? 'selected' : '' %>><%= d %></option>
+    <% } %>
+    <option value="__other" <%= isOther ? 'selected' : '' %>>Other…</option>
+  </select>
+  <div id="department_other_wrap" class="other-wrap" <%= isOther ? '' : 'hidden' %>>
+    <input name="department_other" maxlength="100" placeholder="Type your department or centre" value="<%= isOther ? values.department : '' %>">
+  </div>
+  <% if (errors.department) { %><p class="err"><%= errors.department %></p><% } %>
+</div>

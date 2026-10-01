@@ -1,0 +1,25 @@
+<%- include('partials/head') %>
+<%
+  const icons = { new_match: '📣', joined: '🙋', left: '👋', full: '🎉', cancelled: '🚫', removed: '⛔', message: '💬' };
+%>
+<div class="narrow">
+  <h1>Notifications</h1>
+  <% if (items.length) { %>
+    <ul class="notes-list card">
+      <% for (const n of items) { %>
+        <li class="<%= n.read_at ? '' : 'unread' %>">
+          <a href="<%= n.match_id ? `/matches/${n.match_id}` : '#' %>">
+            <span class="note-ico" aria-hidden="true"><%= icons[n.kind] || '🔔' %></span>
+            <span class="note-body"><%= n.body %><small><%= ago(n.created_at) %></small></span>
+          </a>
+        </li>
+      <% } %>
+    </ul>
+  <% } else { %>
+    <div class="card empty">
+      <div class="empty-emoji" aria-hidden="true">🔕</div>
+      <p>No notifications yet. You’ll hear from us when people join your matches.</p>
+    </div>
+  <% } %>
+</div>
+<%- include('partials/foot') %>

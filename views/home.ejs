@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+<section class="hero">
+  <p class="eyebrow">For IIT Roorkee students</p>
+  <h1>Find your game.<br><span class="hl">Fill your team.</span></h1>
+  <p class="lead">Post a match, wait for people to tap <b>“I’m in”</b>, and play. Football to foosball, badminton to 8-ball — we find the players you’re short of.</p>
+  <div class="hero-cta">
+    <a class="btn btn-lg" href="/signup">Sign up with your IITR email</a>
+    <a class="btn btn-ghost btn-lg" href="/login">Log in</a>
+  </div>
+  <% if (openCount > 0) { %>
+    <p class="muted live-count"><span class="pulse" aria-hidden="true"></span><%= plural(openCount, 'match') %> looking for players right now</p>
+  <% } %>
+</section>
+
+<section class="sport-wall" aria-label="Sports you can play">
+  <% for (const s of SPORTS) { %>
+    <div class="sport-tile"><span aria-hidden="true"><%= s.emoji %></span><%= s.name %></div>
+  <% } %>
+</section>
+
+<section class="steps">
+  <div class="card step"><b>1</b><h3>Sign up</h3><p>Your <%= emailDomain %> email, enrollment number, department and year. Pick the sports you play.</p></div>
+  <div class="card step"><b>2</b><h3>Host or join</h3><p>Singles or doubles, 5-a-side or full 11 — the app knows how many players each format needs.</p></div>
+  <div class="card step"><b>3</b><h3>Game on</h3><p>Get notified when your match fills up, chat with your teammates, and show up.</p></div>
+</section>
+<%- include('partials/foot') %>

@@ -1,0 +1,14 @@
+<%# Checkbox chips for picking the sports you play. Needs `selected` (array of keys). %>
+<% for (const cat of CATEGORIES) { %>
+  <div class="chip-group">
+    <div class="chip-group-label"><%= cat.name %></div>
+    <div class="chips">
+      <% for (const s of SPORTS.filter((x) => x.category === cat.key)) { %>
+        <label class="chip">
+          <input type="checkbox" name="sports" value="<%= s.key %>" <%= selected.includes(s.key) ? 'checked' : '' %>>
+          <span><%= s.emoji %> <%= s.name %></span>
+        </label>
+      <% } %>
+    </div>
+  </div>
+<% } %>

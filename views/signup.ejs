@@ -1,0 +1,75 @@
+<%- include('partials/head') %>
+<div class="narrow">
+  <h1>Create your account</h1>
+  <p class="muted">Only IIT Roorkee students can join<%= mailEnabled ? ' — we’ll email you a code to verify your address' : '' %>.</p>
+
+  <form method="post" action="/signup" class="card form" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+
+    <div class="field">
+      <label for="name">Full name</label>
+      <input id="name" name="name" autocomplete="name" required maxlength="80" value="<%= values.name || '' %>">
+      <% if (errors.name) { %><p class="err"><%= errors.name %></p><% } %>
+    </div>
+
+    <div class="field">
+      <label for="email">IITR email</label>
+      <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required placeholder="yourname@xx.<%= emailDomain %>" value="<%= values.email || '' %>">
+      <p class="hint">Must end in <code><%= emailDomain %></code> (e.g. name@cs.<%= emailDomain %>).</p>
+      <% if (errors.email) { %><p class="err"><%= errors.email %></p><% } %>
+    </div>
+
+    <div class="row-2">
+      <div class="field">
+        <label for="enrollment_no">Enrollment no.</label>
+        <input id="enrollment_no" name="enrollment_no" inputmode="numeric" pattern="\d{8}" maxlength="8" required placeholder="26563021" value="<%= values.enrollment_no || '' %>">
+        <% if (errors.enrollment_no) { %><p class="err"><%= errors.enrollment_no %></p><% } %>
+      </div>
+      <div class="field">
+        <label for="year">Year / programme</label>
+        <select id="year" name="year" required>
+          <option value="">Choose…</option>
+          <% for (const y of YEARS) { %>
+            <option value="<%= y.key %>" <%= values.year === y.key ? 'selected' : '' %>><%= y.label %></option>
+          <% } %>
+        </select>
+        <% if (errors.year) { %><p class="err"><%= errors.year %></p><% } %>
+      </div>
+    </div>
+
+    <%- include('partials/department', { values, errors }) %>
+
+    <fieldset class="field">
+      <legend>Gender <span class="hint-inline">— used for men-only / women-only matches</span></legend>
+      <div class="segmented">
+        <% for (const g of GENDERS) { %>
+          <label><input type="radio" name="gender" value="<%= g.key %>" <%= values.gender === g.key ? 'checked' : '' %> required><span><%= g.label %></span></label>
+        <% } %>
+      </div>
+      <% if (errors.gender) { %><p class="err"><%= errors.gender %></p><% } %>
+    </fieldset>
+
+    <div class="field">
+      <label for="phone">WhatsApp number <span class="hint-inline">(optional)</span></label>
+      <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="15" placeholder="98765 43210" value="<%= values.phone || '' %>">
+      <p class="hint">Only shown to players in the same match as you.</p>
+      <% if (errors.phone) { %><p class="err"><%= errors.phone %></p><% } %>
+    </div>
+
+    <fieldset class="field">
+      <legend>Sports you’re ready to play</legend>
+      <p class="hint">We’ll tell you when someone posts a match in these.</p>
+      <%- include('partials/sport-chips', { selected: values.sports || [] }) %>
+    </fieldset>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+      <% if (errors.password) { %><p class="err"><%= errors.password %></p><% } %>
+    </div>
+
+    <button class="btn btn-lg btn-block" type="submit">Create account</button>
+    <p class="muted center">Already have an account? <a href="/login">Log in</a></p>
+  </form>
+</div>
+<%- include('partials/foot') %>

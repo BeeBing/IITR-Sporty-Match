@@ -1,0 +1,29 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: iitrSportyMatch
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: iitr-sporty-match-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      # Optional: turns on email verification, password reset and "match full" emails.
+      - key: SMTP_URL
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+
+databases:
+  - name: iitr-sporty-match-db
+    region: singapore
+    plan: free

@@ -1,0 +1,45 @@
+<%- include('../partials/head') %>
+<%
+  const s = getSport(match.sport) || { emoji: '🏅', name: match.sport };
+  const f = getFormat(match.sport, match.format) || { label: match.format };
+  const link = appUrl(`/matches/${match.id}`);
+  const shareText = state.key === 'open'
+    ? `Need ${plural(layout.open, 'more player')} for ${s.name} (${f.label}) at ${match.venue}, ${when(match.starts_at)}. Tap “I’m in”: ${link}`
+    : `${s.name} (${f.label}) at ${match.venue}, ${when(match.starts_at)}: ${link}`;
+%>
+<a class="back" href="/matches">← All matches</a>
+
+<section class="card match-hero">
+  <div class="mh-emoji" aria-hidden="true"><%= s.emoji %></div>
+  <div class="mh-body">
+    <h1><%= s.name %> <span class="muted">· <%= f.label %></span></h1>
+    <ul class="facts">
+      <li><span aria-hidden="true">🕒</span> <%= when(match.starts_at) %> – <%= clock(match.ends_at) %></li>
+      <li><span aria-hidden="true">📍</span> <%= match.venue %></li>
+      <li><span aria-hidden="true">👥</span> <%= match.capacity %> players<%= match.team_size ? ` · ${match.team_size} per side` : '' %></li>
+      <li><span aria-hidden="true">🎚️</span> <%= label(MATCH_SKILLS, match.skill_level) %></li>
+      <% if (match.gender_pref !== 'any') { %><li><span aria-hidden="true">🚻</span> <%= label(GENDER_PREFS, match.gender_pref) %></li><% } %>
+    </ul>
+  </div>
+  <% if (match.notes) { %><p class="notes"><%= match.notes %></p><% } %>
+  <div class="share-row">
+      <a class="btn btn-sm btn-whatsapp" href="https://wa.me/?text=<%= encodeURIComponent(shareText) %>" target="_blank" rel="noopener">Share on WhatsApp</a>
+      <button class="btn btn-sm btn-ghost" type="button" data-copy="<%= link %>">Copy link</button>
+      <% if (match.joined && match.status === 'open') { %>
+        <a class="btn btn-sm btn-ghost" href="<%= calendarUrl(match, link) %>" target="_blank" rel="noopener">Add to calendar</a>
+      <% } %>
+  </div>
+</section>
+
+<div id="live" data-live-url="/matches/<%= match.id %>/live" data-version="<%= version %>">
+  <%- include('live') %>
+</div>
+
+<% if (match.joined) { %>
+  <form method="post" action="/matches/<%= match.id %>/messages" class="chat-form" id="chat-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <input name="body" maxlength="500" autocomplete="off" placeholder="Message the players… e.g. “I’ll bring the shuttles”" required aria-label="Message">
+    <button class="btn" type="submit">Send</button>
+  </form>
+<% } %>
+<%- include('../partials/foot') %>

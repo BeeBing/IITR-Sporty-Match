@@ -1,0 +1,27 @@
+{
+  "name": "iitr-sports-matchup",
+  "version": "1.0.0",
+  "description": "IITR Sporty Match — find players for any sport at IIT Roorkee",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch --env-file-if-exists=.env src/server.js",
+    "test": "node --test --test-concurrency=1 \"test/**/*.test.js\""
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "connect-pg-simple": "^10.0.0",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "nodemailer": "^10.0.13",
+    "pg": "^8.23.1"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  }
+}

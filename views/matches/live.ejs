@@ -1,0 +1,125 @@
+<%
+  const me = players.find((p) => p.user_id === currentUser.id);
+  const isHost = match.host_id === currentUser.id;
+  const eligible = match.gender_pref === 'any' || match.gender_pref === currentUser.gender;
+  const active = state.key !== 'cancelled' && state.key !== 'finished';
+  const canJoin = !me && eligible && active && layout.open > 0;
+  const hostName = firstName(match.host_name);
+  const slotCtx = { match, isHost, active, showContacts: !!me };
+  const banner = {
+    cancelled: ['This match was cancelled.', 'Find another game on the board.'],
+    finished: ['This match is over.', 'Hope it was a good one!'],
+    full: ['Full — game on! 🎉', `All ${match.capacity} players are in. See you at ${match.venue}.`],
+    live: [state.label, layout.open > 0 ? 'Still room — tap “I’m in” and head over.' : 'Have a great game!'],
+    open: [
+      `Waiting for ${plural(layout.open, 'more player')}`,
+      isHost ? 'You’re in. We’ll notify you as people join — share the link to fill it faster.'
+        : me ? 'You’re in. We’ll let you know when it fills up.'
+        : 'Tap “I’m in” to take a spot.',
+    ],
+  }[state.key];
+%>
+<section class="status-banner status-<%= state.key %>" aria-live="polite">
+  <h2><%= banner[0] %></h2>
+  <p><%= banner[1] %></p>
+</section>
+
+<% function openSlots(n, team) { %>
+  <% for (let i = 0; i < n; i++) { %>
+    <li class="slot slot-open">
+      <span class="avatar avatar-empty" aria-hidden="true">?</span>
+      <span class="who"><b>Open spot</b></span>
+      <% if (canJoin && i === 0) { %>
+        <form method="post" action="/matches/<%= match.id %>/join">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <% if (team) { %><input type="hidden" name="team" value="<%= team %>"><% } %>
+          <button class="btn btn-sm" type="submit"><%= team ? `Join Team ${team}` : 'I’m in' %></button>
+        </form>
+      <% } %>
+    </li>
+  <% } %>
+<% } %>
+
+<% function guestSlots(n) { %>
+  <% for (let i = 0; i < n; i++) { %>
+    <li class="slot slot-guest">
+      <span class="avatar avatar-ghost" aria-hidden="true">+1</span>
+      <span class="who"><b>Friend of <%= hostName %></b><small>Not on the app</small></span>
+    </li>
+  <% } %>
+<% } %>
+
+<section class="roster">
+  <% if (layout.teams) { %>
+    <div class="teams">
+      <% for (const t of [layout.teams.A, layout.teams.B]) { %>
+        <div class="team card">
+          <h3>Team <%= t.key %> <span class="muted"><%= t.members.length + t.guests %>/<%= match.team_size %></span></h3>
+          <ul class="slots">
+            <% for (const p of t.members) { %><%- include('player', { p, ...slotCtx }) %><% } %>
+            <% guestSlots(t.guests) %>
+            <% openSlots(t.open, t.key) %>
+          </ul>
+        </div>
+      <% } %>
+    </div>
+  <% } else { %>
+    <div class="card">
+      <h3>Players <span class="muted"><%= players.length + match.guests %>/<%= match.capacity %></span></h3>
+      <ul class="slots">
+        <% for (const p of players) { %><%- include('player', { p, ...slotCtx }) %><% } %>
+        <% guestSlots(match.guests) %>
+        <% openSlots(layout.open, null) %>
+      </ul>
+    </div>
+  <% } %>
+</section>
+
+<section class="actions">
+  <% if (canJoin) { %>
+    <form method="post" action="/matches/<%= match.id %>/join">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <button class="btn btn-lg btn-block btn-join" type="submit">I’m in! 🙋</button>
+    </form>
+  <% } else if (!me && active && !eligible) { %>
+    <p class="muted center">This match is <%= label(GENDER_PREFS, match.gender_pref).toLowerCase() %>.</p>
+  <% } %>
+  <% if (me && !isHost && active) { %>
+    <div class="action-row">
+      <% if (layout.teams && layout.teams[me.team === 'A' ? 'B' : 'A'].open > 0) { %>
+        <form method="post" action="/matches/<%= match.id %>/switch">
+          <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+          <button class="btn btn-ghost" type="submit">Switch to Team <%= me.team === 'A' ? 'B' : 'A' %></button>
+        </form>
+      <% } %>
+      <form method="post" action="/matches/<%= match.id %>/leave" data-confirm="Drop out of this match? The host will be notified.">
+        <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+        <button class="btn btn-ghost btn-danger" type="submit">Leave match</button>
+      </form>
+    </div>
+  <% } %>
+  <% if (isHost && active) { %>
+    <form method="post" action="/matches/<%= match.id %>/cancel" data-confirm="Cancel this match for everyone? All players will be notified." class="center">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <button class="btn btn-ghost btn-danger" type="submit">Cancel match</button>
+    </form>
+  <% } %>
+</section>
+
+<% if (me) { %>
+  <section class="chat card" id="chat">
+    <h3>Match chat</h3>
+    <% if (messages.length) { %>
+      <ol class="messages" data-chat-log>
+        <% for (const msg of messages) { %>
+          <li class="<%= msg.user_id === currentUser.id ? 'mine' : '' %>">
+            <span class="msg-meta"><b><%= msg.user_id === currentUser.id ? 'You' : msg.name %></b> · <%= ago(msg.created_at) %></span>
+            <span class="msg-body"><%= msg.body %></span>
+          </li>
+        <% } %>
+      </ol>
+    <% } else { %>
+      <p class="muted">Only players in this match can see this. Sort out court booking, gear and timing here.</p>
+    <% } %>
+  </section>
+<% } %>

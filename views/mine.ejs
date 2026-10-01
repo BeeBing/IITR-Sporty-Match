@@ -1,0 +1,22 @@
+<%- include('partials/head') %>
+<h1>My games</h1>
+
+<section>
+  <h2>Upcoming</h2>
+  <% if (upcoming.length) { %>
+    <div class="list"><% for (const m of upcoming) { %><%- include('partials/match-card', { m }) %><% } %></div>
+  <% } else { %>
+    <div class="card empty">
+      <p>You’re not in any upcoming matches.</p>
+      <a class="btn" href="/matches">Find a game</a>
+    </div>
+  <% } %>
+</section>
+
+<% if (past.length) { %>
+  <section>
+    <h2>Played</h2>
+    <div class="list"><% for (const m of past) { %><%- include('partials/match-card', { m }) %><% } %></div>
+  </section>
+<% } %>
+<%- include('partials/foot') %>

@@ -1,0 +1,47 @@
+<%- include('partials/head') %>
+<section class="greet">
+  <div>
+    <h1>Hey <%= firstName(currentUser.name) %> 👋</h1>
+    <p class="muted">Ready to play?</p>
+  </div>
+  <a class="btn btn-lg" href="/matches/new">＋ Host a match</a>
+</section>
+
+<% if (mySports.length) { %>
+  <nav class="quick-sports" aria-label="Your sports">
+    <% for (const us of mySports) { const s = getSport(us.sport); if (!s) continue; %>
+      <a class="chip-link" href="/matches?sport=<%= s.key %>"><%= s.emoji %> <%= s.name %></a>
+    <% } %>
+  </nav>
+<% } else { %>
+  <div class="card nudge">
+    <p><b>Tell us what you play.</b> Add your sports to get matches recommended and hear about new games.</p>
+    <a class="btn btn-sm" href="/profile#sports">Add sports</a>
+  </div>
+<% } %>
+
+<section>
+  <h2>Your upcoming games</h2>
+  <% if (upcoming.length) { %>
+    <div class="list"><% for (const m of upcoming) { %><%- include('partials/match-card', { m }) %><% } %></div>
+  <% } else { %>
+    <p class="muted">Nothing lined up yet. Join one below or host your own.</p>
+  <% } %>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2><%= mySports.length ? 'Open matches in your sports' : 'Open matches' %></h2>
+    <a href="/matches">See all</a>
+  </div>
+  <% if (forYou.length) { %>
+    <div class="list"><% for (const m of forYou) { %><%- include('partials/match-card', { m }) %><% } %></div>
+  <% } else { %>
+    <div class="card empty">
+      <div class="empty-emoji" aria-hidden="true">🏟️</div>
+      <p>No one’s looking for players right now. Be the first — post a match and others will join.</p>
+      <a class="btn" href="/matches/new">Host a match</a>
+    </div>
+  <% } %>
+</section>
+<%- include('partials/foot') %>

@@ -1,0 +1,116 @@
+<%- include('../partials/head') %>
+<%
+  const sport = getSport(values.sport);
+  const format = sport && getFormat(values.sport, values.format);
+  const venues = (sportsData.find((s) => s.key === values.sport) || { venues: [] }).venues;
+%>
+<h1>Host a match</h1>
+<p class="muted">Post it, then wait for players to tap “I’m in”. You’ll get a notification as each one joins.</p>
+
+<form method="post" action="/matches" class="card form" id="match-form" novalidate>
+  <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+  <% if (errors.form) { %><p class="err err-box"><%= errors.form %></p><% } %>
+
+  <fieldset class="field">
+    <legend>1. Sport</legend>
+    <% for (const cat of CATEGORIES) { %>
+      <div class="chip-group">
+        <div class="chip-group-label"><%= cat.name %></div>
+        <div class="chips">
+          <% for (const s of SPORTS.filter((x) => x.category === cat.key)) { %>
+            <label class="chip">
+              <input type="radio" name="sport" value="<%= s.key %>" <%= values.sport === s.key ? 'checked' : '' %> required>
+              <span><%= s.emoji %> <%= s.name %></span>
+            </label>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+    <% if (errors.sport) { %><p class="err"><%= errors.sport %></p><% } %>
+  </fieldset>
+
+  <fieldset class="field">
+    <legend>2. Format</legend>
+    <div class="formats" id="formats">
+      <% if (sport) { for (const f of sport.formats) { %>
+        <label class="format-card">
+          <input type="radio" name="format" value="<%= f.key %>" <%= values.format === f.key ? 'checked' : '' %> required>
+          <span><b><%= f.label %></b><small><%= f.type === 'sides' ? `${f.max} players · ${f.perTeam} per side` : f.min === f.max ? `${f.max} players` : `${f.min}–${f.max} players` %></small></span>
+        </label>
+      <% } } else { %>
+        <p class="muted">Pick a sport first.</p>
+      <% } %>
+    </div>
+    <% if (errors.format) { %><p class="err"><%= errors.format %></p><% } %>
+  </fieldset>
+
+  <div class="field" id="capacity-field" <%= format && format.type === 'group' && format.min !== format.max ? '' : 'hidden' %>>
+    <label for="capacity">How many players in total (including you)?</label>
+    <input id="capacity" name="capacity" type="number" inputmode="numeric"
+           min="<%= format ? format.min : 2 %>" max="<%= format ? format.max : 30 %>"
+           value="<%= Number.isInteger(values.capacity) ? values.capacity : (format ? format.min : '') %>">
+    <% if (errors.capacity) { %><p class="err"><%= errors.capacity %></p><% } %>
+  </div>
+
+  <div class="field">
+    <label for="guests">Friends already playing with you <span class="hint-inline">(not on the app)</span></label>
+    <input id="guests" name="guests" type="number" inputmode="numeric" min="0" max="28" value="<%= values.guests || 0 %>">
+    <p class="hint">E.g. for doubles with your partner, put 1 — we’ll look for the other two.</p>
+    <% if (errors.guests) { %><p class="err"><%= errors.guests %></p><% } %>
+  </div>
+
+  <p class="need-summary" id="need-summary" aria-live="polite"></p>
+
+  <div class="row-2">
+    <div class="field">
+      <label for="starts_at">3. When</label>
+      <input id="starts_at" name="starts_at" type="datetime-local" required value="<%= values.starts_at_input || '' %>">
+      <% if (errors.starts_at) { %><p class="err"><%= errors.starts_at %></p><% } %>
+    </div>
+    <div class="field">
+      <label for="duration_min">For how long</label>
+      <select id="duration_min" name="duration_min">
+        <% for (const d of DURATIONS) { %>
+          <option value="<%= d %>" <%= values.duration_min === d ? 'selected' : '' %>><%= d < 60 ? `${d} min` : `${d / 60} hr${d > 60 ? 's' : ''}`.replace('.5 hr', '½ hr') %></option>
+        <% } %>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="venue">4. Where</label>
+    <input id="venue" name="venue" list="venue-list" maxlength="80" required placeholder="e.g. MAC badminton court 3" value="<%= values.venue || '' %>">
+    <datalist id="venue-list"><% for (const v of venues) { %><option value="<%= v %>"><% } %></datalist>
+    <% if (errors.venue) { %><p class="err"><%= errors.venue %></p><% } %>
+  </div>
+
+  <fieldset class="field">
+    <legend>5. Who can join</legend>
+    <div class="segmented">
+      <label><input type="radio" name="gender_pref" value="any" <%= values.gender_pref !== currentUser.gender ? 'checked' : '' %>><span>Open to everyone</span></label>
+      <% if (currentUser.gender === 'male' || currentUser.gender === 'female') { %>
+        <label><input type="radio" name="gender_pref" value="<%= currentUser.gender %>" <%= values.gender_pref === currentUser.gender ? 'checked' : '' %>><span><%= label(GENDER_PREFS, currentUser.gender) %></span></label>
+      <% } %>
+    </div>
+    <% if (errors.gender_pref) { %><p class="err"><%= errors.gender_pref %></p><% } %>
+  </fieldset>
+
+  <div class="field">
+    <label for="skill_level">Level</label>
+    <select id="skill_level" name="skill_level">
+      <% for (const s of MATCH_SKILLS) { %>
+        <option value="<%= s.key %>" <%= values.skill_level === s.key ? 'selected' : '' %>><%= s.label %></option>
+      <% } %>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="notes">Notes <span class="hint-inline">(optional)</span></label>
+    <textarea id="notes" name="notes" rows="3" maxlength="500" placeholder="e.g. I have shuttles, bring your own racket. Court booked till 7."><%= values.notes || '' %></textarea>
+  </div>
+
+  <button class="btn btn-lg btn-block" type="submit">Post match</button>
+</form>
+
+<script type="application/json" id="sports-data"><%- JSON.stringify(sportsData).replace(/</g, '\\u003c') %></script>
+<%- include('../partials/foot') %>

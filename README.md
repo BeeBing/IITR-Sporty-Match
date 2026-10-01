@@ -1,1 +1,74 @@
-# IITR-Sporty-Match
+# IITR Sporty Match
+
+Matchmaking for sports at IIT Roorkee. Post a match, wait for people to tap **“I’m in”**, and play.
+
+## What it does
+
+- **IITR-only sign-up.** Email must end in `iitr.ac.in` (department subdomains like `name@cs.iitr.ac.in` work), plus an 8-digit enrollment number, department or centre, year/programme (1st–5th year, M.Tech, M.Sc, MBA, PhD) and gender.
+- **17 sports**, each with the right player counts:
+
+  | Sport | Formats |
+  | --- | --- |
+  | Football | 5v5, 7v7, 11v11, casual kickabout (4–22) |
+  | Cricket | Box 6v6, tape-ball 8v8, 11v11, net practice (2–8) |
+  | Hockey | 5v5, 7v7, 11v11 |
+  | Badminton, Squash, Lawn Tennis, Table Tennis | Singles 1v1, Doubles 2v2 |
+  | Basketball | 1v1, 3v3, 5v5 |
+  | Volleyball | 4v4, 6v6 |
+  | Chess | 1v1 |
+  | Carrom, Snooker, 8-Ball Pool, Air Hockey, Foosball | Singles 1v1, Doubles 2v2 |
+  | Gym | Workout buddy (2), group workout (3–6) |
+
+- **Host a match.** The host picks sport, format, time, venue, level and who can join (everyone, or their own gender only). They can say how many friends are already with them. For example, doubles with your partner means the app looks for 2 more. The match then waits until other players join.
+- **Teams.** Two-sided formats show Team A and Team B. The host's friends fill Team A first. Joiners can pick a side or be placed automatically, and can switch sides later.
+- **Fewer duplicate matches.** If similar open matches exist around the same time, the host is offered those to join first.
+- **Live match page.** The roster refreshes on its own. Players in the match can see each other's email and WhatsApp, and get a private match chat, WhatsApp share, and add-to-calendar.
+- **Notifications** when someone joins or leaves your match, when it fills ("Game on!"), when it's cancelled, on new chat messages, and when someone posts a match in a sport you play.
+- **Profile** with sports and a self-rated level for each, which teammates see on the match page.
+- **Optional email** (set `SMTP_URL`). It turns on 6-digit email verification at sign-up, password reset, and a "your match is full" email.
+
+## Running locally
+
+Needs Node 22+ and PostgreSQL.
+
+```sh
+npm install
+cp .env.example .env          # point DATABASE_URL at a local database
+npm run dev                   # http://localhost:3000
+```
+
+The schema in `src/schema.sql` is applied automatically on boot.
+
+### Tests
+
+```sh
+createdb sporty_test
+TEST_DATABASE_URL=postgres://user:pass@localhost/sporty_test npm test
+```
+
+The test suite wipes the test database on every run.
+
+## Deploying on Render
+
+`render.yaml` is a Blueprint for a free web service (`iitrSportyMatch`) and a free Postgres database in Singapore. Set these environment variables on the web service:
+
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `DATABASE_URL` | yes | Use the database's **internal** URL |
+| `SESSION_SECRET` | yes | Any long random string |
+| `NODE_ENV` | yes | `production` |
+| `SMTP_URL` | no | e.g. `smtps://user:app-password@smtp.gmail.com:465`. Turns on email verification and reset |
+| `MAIL_FROM` | no | Sender shown on emails |
+| `ALLOWED_EMAIL_DOMAIN` | no | Defaults to `iitr.ac.in` |
+
+Without `SMTP_URL`, accounts are trusted at sign-up: the email format is checked, but nobody proves they own the inbox. Configure SMTP before sharing the app widely.
+
+## Customising
+
+- Sports, formats and player counts: `src/sports.js`
+- Venue suggestions per sport type: `VENUES` in `src/sports.js`
+- Departments, years and skill levels: `src/constants.js`
+
+## Stack
+
+Express 5, EJS (server-rendered, works without a build step), PostgreSQL via `pg`, and sessions stored in Postgres. bcrypt for passwords, Helmet for security headers, CSRF tokens on every form, and rate-limited auth endpoints.

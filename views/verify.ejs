@@ -1,0 +1,19 @@
+<%- include('partials/head') %>
+<div class="narrow">
+  <h1>Check your inbox</h1>
+  <p class="muted">We sent a 6-digit code to <b><%= currentUser.email %></b>. Enter it to finish signing up.</p>
+  <form method="post" action="/verify" class="card form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <% if (error) { %><p class="err err-box"><%= error %></p><% } %>
+    <div class="field">
+      <label for="code">Code</label>
+      <input id="code" name="code" class="code-input" inputmode="numeric" autocomplete="one-time-code" pattern="\d{6}" maxlength="6" required>
+    </div>
+    <button class="btn btn-lg btn-block" type="submit">Verify</button>
+  </form>
+  <form method="post" action="/verify/resend" class="center">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <button class="linkish" type="submit">Send a new code</button>
+  </form>
+</div>
+<%- include('partials/foot') %>

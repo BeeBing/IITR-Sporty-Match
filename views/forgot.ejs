@@ -1,0 +1,20 @@
+<%- include('partials/head') %>
+<div class="narrow">
+  <h1>Reset your password</h1>
+  <% if (mailEnabled) { %>
+    <form method="post" action="/forgot" class="card form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <div class="field">
+        <label for="email">IITR email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required value="<%= email %>">
+      </div>
+      <button class="btn btn-lg btn-block" type="submit">Email me a reset code</button>
+    </form>
+  <% } else { %>
+    <div class="card">
+      <p>Password reset by email isn’t switched on yet. Ask the app admin to reset your account.</p>
+    </div>
+  <% } %>
+  <p class="center"><a href="/login">Back to log in</a></p>
+</div>
+<%- include('partials/foot') %>

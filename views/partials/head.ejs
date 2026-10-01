@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title><%= locals.title ? `${title} · IITR Sporty Match` : 'IITR Sporty Match — find your game at IIT Roorkee' %></title>
+  <meta name="description" content="Find players at IIT Roorkee for football, badminton, squash, chess, table tennis, cricket, pool and more.">
+  <meta name="theme-color" content="#0f5132">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body class="<%= currentUser ? 'authed' : 'guest' %>">
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">
+      <img src="/favicon.svg" alt="" width="30" height="30">
+      <span>IITR <b>Sporty Match</b></span>
+    </a>
+    <% if (currentUser) { %>
+      <nav class="tabs" aria-label="Main">
+        <a href="/dashboard" class="<%= path === '/dashboard' ? 'active' : '' %>"><span class="ico" aria-hidden="true">🏠</span>Home</a>
+        <a href="/matches" class="<%= path === '/matches' ? 'active' : '' %>"><span class="ico" aria-hidden="true">🔎</span>Find</a>
+        <a href="/matches/new" class="tab-host <%= path === '/matches/new' ? 'active' : '' %>"><span class="ico" aria-hidden="true">＋</span>Host</a>
+        <a href="/me/matches" class="<%= path === '/me/matches' ? 'active' : '' %>"><span class="ico" aria-hidden="true">📅</span>My games</a>
+        <a href="/profile" class="<%= path === '/profile' ? 'active' : '' %>"><span class="ico" aria-hidden="true">👤</span>Profile</a>
+      </nav>
+      <a class="bell" href="/notifications" aria-label="Notifications">
+        <span aria-hidden="true">🔔</span>
+        <span class="bell-count" data-unread <%= unread ? '' : 'hidden' %>><%= unread %></span>
+      </a>
+    <% } else { %>
+      <div class="guest-links">
+        <a href="/login">Log in</a>
+        <a class="btn btn-sm" href="/signup">Sign up</a>
+      </div>
+    <% } %>
+  </div>
+</header>
+<main class="container">
+<% if (flash) { %>
+  <div class="flash flash-<%= flash.type %>" role="status"><%= flash.msg %></div>
+<% } %>

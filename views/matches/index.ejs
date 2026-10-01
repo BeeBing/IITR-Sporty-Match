@@ -1,0 +1,40 @@
+<%- include('../partials/head') %>
+<h1>Find a game</h1>
+
+<form class="filters card" method="get" action="/matches" data-autosubmit>
+  <div class="field">
+    <label for="f-sport">Sport</label>
+    <select id="f-sport" name="sport">
+      <option value="">All sports</option>
+      <% for (const cat of CATEGORIES) { %>
+        <optgroup label="<%= cat.name %>">
+          <% for (const s of SPORTS.filter((x) => x.category === cat.key)) { %>
+            <option value="<%= s.key %>" <%= filters.sport === s.key ? 'selected' : '' %>><%= s.emoji %> <%= s.name %></option>
+          <% } %>
+        </optgroup>
+      <% } %>
+    </select>
+  </div>
+  <fieldset class="field">
+    <legend>When</legend>
+    <div class="segmented">
+      <% for (const [k, l] of [['', 'Any time'], ['today', 'Today'], ['tomorrow', 'Tomorrow'], ['week', 'Next 7 days']]) { %>
+        <label><input type="radio" name="day" value="<%= k %>" <%= filters.day === k ? 'checked' : '' %>><span><%= l %></span></label>
+      <% } %>
+    </div>
+  </fieldset>
+  <label class="check"><input type="checkbox" name="full" value="1" <%= filters.includeFull ? 'checked' : '' %>> Show full matches too</label>
+  <noscript><button class="btn btn-sm" type="submit">Apply</button></noscript>
+</form>
+
+<% if (list.length) { %>
+  <p class="muted"><%= plural(list.length, 'match') %><%= filters.includeFull ? '' : ' with open spots' %></p>
+  <div class="list"><% for (const m of list) { %><%- include('../partials/match-card', { m }) %><% } %></div>
+<% } else { %>
+  <div class="card empty">
+    <div class="empty-emoji" aria-hidden="true"><%= filters.sport ? getSport(filters.sport).emoji : '🏟️' %></div>
+    <p>No open <%= filters.sport ? getSport(filters.sport).name : '' %> matches<%= filters.day === 'today' ? ' today' : filters.day === 'tomorrow' ? ' tomorrow' : '' %>.</p>
+    <a class="btn" href="/matches/new<%= filters.sport ? `?sport=${filters.sport}` : '' %>">Host one — others will join</a>
+  </div>
+<% } %>
+<%- include('../partials/foot') %>

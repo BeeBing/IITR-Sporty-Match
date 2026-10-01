@@ -1,0 +1,26 @@
+<%
+  const s = getSport(m.sport) || { emoji: '🏅', name: m.sport };
+  const f = getFormat(m.sport, m.format) || { label: m.format };
+  const st = matchState(m);
+  const filled = m.player_count + m.guests;
+%>
+<a class="card match-card state-<%= st.key %>" href="/matches/<%= m.id %>">
+  <div class="mc-emoji" aria-hidden="true"><%= s.emoji %></div>
+  <div class="mc-body">
+    <div class="mc-head">
+      <div class="mc-title"><%= s.name %> <span class="muted">· <%= f.label %></span></div>
+      <span class="pill pill-<%= st.key %>"><%= st.label %></span>
+    </div>
+    <div class="mc-sub"><%= when(m.starts_at) %> · <%= m.venue %></div>
+    <div class="dots" role="img" aria-label="<%= filled %> of <%= m.capacity %> players">
+      <% for (let i = 0; i < m.capacity; i++) { %><i class="<%= i < filled ? 'on' : '' %>"></i><% } %>
+      <span class="dots-label"><%= filled %>/<%= m.capacity %></span>
+    </div>
+    <div class="mc-tags">
+      <span class="tag">Host: <%= firstName(m.host_name) %></span>
+      <% if (m.gender_pref !== 'any') { %><span class="tag"><%= label(GENDER_PREFS, m.gender_pref) %></span><% } %>
+      <% if (m.skill_level !== 'any') { %><span class="tag"><%= label(SKILLS, m.skill_level) %></span><% } %>
+      <% if (m.joined) { %><span class="tag tag-brand">You're in</span><% } %>
+    </div>
+  </div>
+</a>

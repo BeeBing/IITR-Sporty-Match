@@ -1,0 +1,24 @@
+<li class="slot slot-player">
+  <span class="avatar" aria-hidden="true"><%= initials(p.name) %></span>
+  <span class="who">
+    <span class="who-name">
+      <b><%= p.name %></b>
+      <% if (p.user_id === match.host_id) { %><span class="tag tag-brand">Host</span><% } %>
+      <% if (p.user_id === currentUser.id) { %><span class="tag">You</span><% } %>
+    </span>
+    <small><%= yearLabel(p.year) %> · <%= p.department %><%= p.skill ? ` · ${label(SKILLS, p.skill)}` : '' %></small>
+    <% if (showContacts && p.user_id !== currentUser.id) { %>
+      <small class="contact">
+        <a href="mailto:<%= p.email %>"><%= p.email %></a>
+        <% if (p.phone) { %> · <a href="https://wa.me/<%= whatsappNumber(p.phone) %>" target="_blank" rel="noopener">WhatsApp</a><% } %>
+      </small>
+    <% } %>
+  </span>
+  <% if (isHost && active && p.user_id !== currentUser.id) { %>
+    <form method="post" action="/matches/<%= match.id %>/remove" data-confirm="Remove <%= p.name %> from this match?">
+      <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+      <input type="hidden" name="user_id" value="<%= p.user_id %>">
+      <button class="icon-btn" type="submit" aria-label="Remove <%= p.name %>">✕</button>
+    </form>
+  <% } %>
+</li>

@@ -1,0 +1,83 @@
+<%- include('partials/head') %>
+<div class="narrow">
+  <div class="profile-head">
+    <span class="avatar avatar-lg" aria-hidden="true"><%= initials(currentUser.name) %></span>
+    <div>
+      <h1><%= currentUser.name %></h1>
+      <p class="muted"><%= currentUser.email %> · <%= currentUser.enrollment_no %></p>
+    </div>
+  </div>
+
+  <form method="post" action="/profile" class="card form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <h2>About you</h2>
+    <div class="field">
+      <label for="name">Full name</label>
+      <input id="name" name="name" required maxlength="80" value="<%= values.name %>">
+      <% if (errors.name) { %><p class="err"><%= errors.name %></p><% } %>
+    </div>
+    <div class="field">
+      <label for="year">Year / programme</label>
+      <select id="year" name="year">
+        <% for (const y of YEARS) { %>
+          <option value="<%= y.key %>" <%= values.year === y.key ? 'selected' : '' %>><%= y.label %></option>
+        <% } %>
+      </select>
+      <% if (errors.year) { %><p class="err"><%= errors.year %></p><% } %>
+    </div>
+    <%- include('partials/department', { values, errors }) %>
+    <fieldset class="field">
+      <legend>Gender</legend>
+      <div class="segmented">
+        <% for (const g of GENDERS) { %>
+          <label><input type="radio" name="gender" value="<%= g.key %>" <%= values.gender === g.key ? 'checked' : '' %>><span><%= g.label %></span></label>
+        <% } %>
+      </div>
+      <% if (errors.gender) { %><p class="err"><%= errors.gender %></p><% } %>
+    </fieldset>
+    <div class="field">
+      <label for="phone">WhatsApp number <span class="hint-inline">(optional)</span></label>
+      <input id="phone" name="phone" type="tel" inputmode="tel" maxlength="15" value="<%= values.phone || '' %>">
+      <p class="hint">Only shown to players in the same match as you.</p>
+      <% if (errors.phone) { %><p class="err"><%= errors.phone %></p><% } %>
+    </div>
+
+    <h2 id="sports">Your sports</h2>
+    <p class="hint">Tick what you play and set your level — teammates see it on the match page.</p>
+    <ul class="sport-levels">
+      <% for (const s of SPORTS) { const on = values.sports.includes(s.key); %>
+        <li>
+          <label class="check"><input type="checkbox" name="sports" value="<%= s.key %>" <%= on ? 'checked' : '' %>> <%= s.emoji %> <%= s.name %></label>
+          <select name="skill_<%= s.key %>" aria-label="<%= s.name %> level">
+            <option value="">Level…</option>
+            <% for (const sk of SKILLS) { %>
+              <option value="<%= sk.key %>" <%= values.skills[s.key] === sk.key ? 'selected' : '' %>><%= sk.label %></option>
+            <% } %>
+          </select>
+        </li>
+      <% } %>
+    </ul>
+
+    <h2>Notifications</h2>
+    <label class="check"><input type="checkbox" name="notify_new_matches" value="1" <%= values.notify_new_matches ? 'checked' : '' %>> Tell me when someone posts a match in my sports</label>
+    <label class="check"><input type="checkbox" name="email_notifications" value="1" <%= values.email_notifications ? 'checked' : '' %>> Email me when my match fills up<%= mailEnabled ? '' : ' (once email is set up)' %></label>
+
+    <button class="btn btn-lg btn-block" type="submit">Save profile</button>
+  </form>
+
+  <form method="post" action="/profile/password" class="card form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <h2>Change password</h2>
+    <% if (pwError) { %><p class="err err-box"><%= pwError %></p><% } %>
+    <div class="field">
+      <label for="current_password">Current password</label>
+      <input id="current_password" name="current_password" type="password" autocomplete="current-password" required>
+    </div>
+    <div class="field">
+      <label for="new_password">New password</label>
+      <input id="new_password" name="new_password" type="password" autocomplete="new-password" minlength="8" required>
+    </div>
+    <button class="btn btn-ghost btn-block" type="submit">Change password</button>
+  </form>
+</div>
+<%- include('partials/foot') %>

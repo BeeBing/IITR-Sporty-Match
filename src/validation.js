@@ -51,7 +51,7 @@ function validateSignup(body) {
   values.enrollment_no = str(body.enrollment_no, 20);
   const password = String(body.password || '');
   if (!isInstituteEmail(values.email)) errors.email = `Use your IITR email, e.g. name@xx.${emailDomain()}`;
-  if (!/^\d{8}$/.test(values.enrollment_no)) errors.enrollment_no = 'Enrollment number is 8 digits, e.g. 26563021.';
+  if (!/^\d{8}$/.test(values.enrollment_no)) errors.enrollment_no = 'Enrollment number is 8 digits, e.g. 12345678.';
   if (password.length < 8) errors.password = 'Use at least 8 characters.';
   return { values, password, errors };
 }
@@ -88,7 +88,8 @@ function validateMatch(body, host, now = new Date()) {
   else if (!format) errors.format = 'Pick a format.';
 
   if (format) {
-    if (format.type === 'sides') values.capacity = format.max;
+    // Only flexible group formats (e.g. a 4–22 kickabout) take a size from the form.
+    if (format.min === format.max) values.capacity = format.max;
     if (!Number.isInteger(values.capacity) || values.capacity < format.min || values.capacity > format.max) {
       errors.capacity = `Choose between ${format.min} and ${format.max} players.`;
     }

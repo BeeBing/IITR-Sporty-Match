@@ -22,7 +22,7 @@
     <div class="row-2">
       <div class="field">
         <label for="enrollment_no">Enrollment no.</label>
-        <input id="enrollment_no" name="enrollment_no" inputmode="numeric" pattern="\d{8}" maxlength="8" required placeholder="26563021" value="<%= values.enrollment_no || '' %>">
+        <input id="enrollment_no" name="enrollment_no" inputmode="numeric" pattern="\d{8}" maxlength="8" required placeholder="12345678" value="<%= values.enrollment_no || '' %>">
         <% if (errors.enrollment_no) { %><p class="err"><%= errors.enrollment_no %></p><% } %>
       </div>
       <div class="field">

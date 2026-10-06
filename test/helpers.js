@@ -118,7 +118,7 @@ function signupForm(overrides = {}) {
   return {
     name: `Player ${counter}`,
     email: `player${counter}@cs.iitr.ac.in`,
-    enrollment_no: String(26560000 + counter),
+    enrollment_no: String(10000000 + counter),
     department: 'Computer Science and Engineering',
     year: '2',
     gender: 'male',

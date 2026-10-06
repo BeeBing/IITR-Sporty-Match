@@ -39,7 +39,7 @@ test('sign-up rejects duplicate email and enrollment number', async () => {
   await signUp(app, form);
   const c = app.client();
   await c.get('/signup');
-  const dupEmail = await c.post('/signup', { ...form, enrollment_no: '29999999' });
+  const dupEmail = await c.post('/signup', { ...form, enrollment_no: '10999999' });
   assert.match(dupEmail.text, /already exists/);
   const dupEnroll = await c.post('/signup', { ...signupForm(), enrollment_no: form.enrollment_no });
   assert.match(dupEnroll.text, /already registered/);
@@ -196,4 +196,23 @@ test('without email set up, login is password-only', async () => {
   assert.doesNotMatch(page.text, /Email me a login code/);
   const res = await c.post('/login/code', { email: 'someone@iitr.ac.in' });
   assert.equal(res.url, '/login');
+});
+
+test('esports: BGMI squads, TDM sides and Roblox parties', async () => {
+  const host = await signUp(app, { sports: ['bgmi', 'roblox'] });
+  const squad = await hostMatch(host, { sport: 'bgmi', format: 'squad', venue: 'Online' });
+  assert.match((await host.get(`/matches/${squad}`)).text, /Waiting for 3 more players/);
+
+  const tdm = await hostMatch(host, { sport: 'bgmi', format: 'tdm', venue: 'Online (Discord voice)' });
+  const tdmPage = await host.get(`/matches/${tdm}`);
+  assert.match(tdmPage.text, /Team A/);
+  assert.match(tdmPage.text, /Waiting for 7 more players/);
+
+  const party = await hostMatch(host, { sport: 'roblox', format: 'party', capacity: '6', venue: 'Online' });
+  assert.match((await host.get(`/matches/${party}`)).text, /Waiting for 5 more players/);
+
+  const mk = await hostMatch(host, { sport: 'mortal-kombat', format: '1v1', venue: 'Bhawan common room' });
+  assert.match((await host.get(`/matches/${mk}`)).text, /Mortal Kombat/);
+  const board = await host.get('/matches/new');
+  assert.match(board.text, /Esports &amp; gaming/);
 });

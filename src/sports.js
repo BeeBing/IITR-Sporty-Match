@@ -14,6 +14,7 @@ const CATEGORIES = [
   { key: 'court', name: 'Court & racket' },
   { key: 'table', name: 'Indoor & table games' },
   { key: 'fitness', name: 'Fitness' },
+  { key: 'esports', name: 'Esports & gaming' },
 ];
 
 const SPORTS = [
@@ -69,6 +70,22 @@ const SPORTS = [
     key: 'gym', name: 'Gym', emoji: '🏋️', category: 'fitness',
     formats: [group('buddy', 'Workout buddy', 2, 2), group('group', 'Group workout', 3, 6)],
   },
+  {
+    key: 'bgmi', name: 'BGMI', emoji: '🪂', category: 'esports',
+    formats: [
+      group('duo', 'Duo (2)', 2, 2),
+      group('squad', 'Squad (4)', 4, 4),
+      sides('tdm', 'Team Deathmatch (4v4)', 4),
+    ],
+  },
+  {
+    key: 'mortal-kombat', name: 'Mortal Kombat', emoji: '🥋', category: 'esports',
+    formats: [sides('1v1', 'Fight (1v1)', 1), group('winner-stays', 'Winner stays on', 3, 8)],
+  },
+  {
+    key: 'roblox', name: 'Roblox', emoji: '🧱', category: 'esports',
+    formats: [group('party', 'Play together', 2, 10)],
+  },
 ];
 
 const BY_KEY = new Map(SPORTS.map((s) => [s.key, s]));
@@ -88,6 +105,7 @@ const VENUES = {
   court: ['MAC (Multi Activity Centre)', 'Badminton hall', 'Squash courts', 'Tennis courts', 'Basketball courts', 'Volleyball courts', 'Bhawan common room'],
   table: ['Bhawan common room', 'SAC (Student Activity Centre)', 'MAC (Multi Activity Centre)'],
   fitness: ['Institute gym', 'Bhawan gym', 'MAC (Multi Activity Centre)'],
+  esports: ['Online', 'Online (Discord voice)', 'Bhawan common room', 'Hostel room'],
 };
 
 function venuesFor(sportKey) {

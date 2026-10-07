@@ -71,6 +71,13 @@ const SPORTS = [
     formats: [group('buddy', 'Workout buddy', 2, 2), group('group', 'Group workout', 3, 6)],
   },
   {
+    key: 'running', name: 'Running', emoji: '🏃', category: 'fitness',
+    // Sports with their own spot override the category's venue hints and prefill the venue.
+    venues: ['LBS ground', 'Around campus'],
+    defaultVenue: 'LBS ground',
+    formats: [group('buddy', 'Running buddy', 2, 2), group('group', 'Group run', 3, 20)],
+  },
+  {
     key: 'bgmi', name: 'BGMI', emoji: '🪂', category: 'esports',
     formats: [
       group('duo', 'Duo (2)', 2, 2),
@@ -110,7 +117,8 @@ const VENUES = {
 
 function venuesFor(sportKey) {
   const sport = getSport(sportKey);
-  return sport ? VENUES[sport.category] : [];
+  if (!sport) return [];
+  return sport.venues || VENUES[sport.category];
 }
 
 module.exports = { SPORTS, CATEGORIES, getSport, getFormat, venuesFor };

@@ -274,6 +274,7 @@
     const guests = $('#guests');
     const summary = $('#need-summary');
     const venues = $('#venue-list');
+    const venueInput = $('#venue');
 
     const currentSport = () => sports.find((s) => s.key === (form.elements.sport.value || ''));
     const currentFormat = () => {
@@ -329,10 +330,15 @@
       summary.textContent = `${total} players${team}: you${g > 0 ? ` + ${g} friend${g === 1 ? '' : 's'}` : ''} → looking for ${need} more.`;
     }
 
+    // A sport's usual spot (Running → LBS ground) fills the venue unless the host typed their own.
+    let autoVenue = (currentSport() && currentSport().defaultVenue) || '';
     form.addEventListener('change', (e) => {
       if (e.target.name === 'sport') {
         renderFormats();
         cap.value = '';
+        const next = (currentSport() && currentSport().defaultVenue) || '';
+        if (!venueInput.value.trim() || venueInput.value === autoVenue) venueInput.value = next;
+        autoVenue = next;
       }
       if (e.target.name === 'format') {
         const f = currentFormat();

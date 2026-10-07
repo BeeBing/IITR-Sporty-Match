@@ -68,6 +68,7 @@ module.exports = function matchRoutes({ pool, mailer, requireAuth }) {
     renderForm(res, {
       sport: sport ? sport.key : '',
       format: sport && sport.formats.length === 1 ? sport.formats[0].key : '',
+      venue: (sport && sport.defaultVenue) || '',
       guests: 0,
       starts_at_input: time.toLocalInput(defaultStart()),
       duration_min: 60,

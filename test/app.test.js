@@ -216,3 +216,15 @@ test('esports: BGMI squads, TDM sides and Roblox parties', async () => {
   const board = await host.get('/matches/new');
   assert.match(board.text, /Esports &amp; gaming/);
 });
+
+test('running defaults to LBS ground and supports group runs', async () => {
+  const host = await signUp(app, { sports: 'running' });
+  const form = await host.get('/matches/new?sport=running');
+  assert.match(form.text, /id="venue"[^>]*value="LBS ground"/);
+  assert.match(form.text, /<option value="LBS ground">/);
+  const id = await hostMatch(host, { sport: 'running', format: 'group', capacity: '6', venue: 'LBS ground' });
+  const page = await host.get(`/matches/${id}`);
+  assert.match(page.text, /Running/);
+  assert.match(page.text, /LBS ground/);
+  assert.match(page.text, /Waiting for 5 more players/);
+});

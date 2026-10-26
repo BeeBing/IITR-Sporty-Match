@@ -103,3 +103,33 @@ test('Brevo mailer sends through the HTTPS API with the configured sender', asyn
   assert.equal(createMailer({ BREVO_API_KEY: 'k' }).enabled, false, 'needs MAIL_FROM too');
   assert.equal(createMailer({}).enabled, false);
 });
+
+test('Brevo setup check reports key and sender problems without sending email', async () => {
+  const { createMailer } = require('../src/mailer');
+  const realFetch = global.fetch;
+  const reply = (routes) => {
+    global.fetch = async (url) => {
+      const [status, body] = routes[new URL(url).pathname];
+      return new Response(JSON.stringify(body), { status });
+    };
+  };
+  const mailer = createMailer({ BREVO_API_KEY: 'xkeysib-test', MAIL_FROM: 'IITR Sporty Match <Hello@Example.com>' });
+  try {
+    reply({ '/v3/account': [401, { message: 'Key not found' }] });
+    assert.match((await mailer.check()).message, /rejected BREVO_API_KEY/);
+
+    reply({ '/v3/account': [200, {}], '/v3/senders': [200, { senders: [{ email: 'other@example.com', active: true }] }] });
+    assert.match((await mailer.check()).message, /isn't a sender in Brevo/);
+
+    reply({ '/v3/account': [200, {}], '/v3/senders': [200, { senders: [{ email: 'hello@example.com', active: false }] }] });
+    assert.match((await mailer.check()).message, /isn't verified yet/);
+
+    reply({ '/v3/account': [200, {}], '/v3/senders': [200, { senders: [{ email: 'hello@example.com', active: true }] }] });
+    const ok = await mailer.check();
+    assert.equal(ok.ok, true);
+    assert.match(ok.message, /Brevo ready/);
+  } finally {
+    global.fetch = realFetch;
+  }
+  assert.equal(createMailer({ SMTP_URL: 'smtp://localhost' }).check, null, 'no check for SMTP');
+});

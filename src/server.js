@@ -13,6 +13,11 @@ async function main() {
   await migrate(pool);
   const mailer = createMailer();
   if (mailer.enabled) console.log(`Email on (${mailer.provider}): verification, login codes and password reset.`);
+  if (mailer.check) {
+    mailer.check()
+      .then((r) => (r.ok ? console.log(r.message) : console.warn(`Email setup problem: ${r.message}`)))
+      .catch((err) => console.warn(`Couldn't reach Brevo to check the email setup: ${err.message}`));
+  }
   else console.warn('Email is off (set BREVO_API_KEY and MAIL_FROM): no verification, login codes or password reset.');
 
   const app = createApp({ pool, mailer, sessionSecret: sessionSecret || 'dev-only-secret', production });

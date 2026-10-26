@@ -13,11 +13,18 @@ function parseAddress(value) {
 // to send email from a free instance.
 function brevoTransport(apiKey, from) {
   const sender = parseAddress(from);
-  return async ({ to, subject, text, html }) => {
+  return async ({ to, subject, text, html, replyTo }) => {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: { 'api-key': apiKey, 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify({ sender, to: [{ email: to }], subject, textContent: text, ...(html && { htmlContent: html }) }),
+      body: JSON.stringify({
+        sender,
+        to: [{ email: to }],
+        subject,
+        textContent: text,
+        ...(html && { htmlContent: html }),
+        ...(replyTo && { replyTo: { email: replyTo } }),
+      }),
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`Brevo responded ${res.status}: ${(await res.text()).slice(0, 300)}`);
@@ -42,7 +49,7 @@ async function brevoCheck(apiKey, from) {
 
 function smtpTransport(url, from) {
   const transport = nodemailer.createTransport(url);
-  return ({ to, subject, text, html }) => transport.sendMail({ from, to, subject, text, html });
+  return ({ to, subject, text, html, replyTo }) => transport.sendMail({ from, to, subject, text, html, replyTo });
 }
 
 // Email is optional. With BREVO_API_KEY (or SMTP_URL) set, sign-ups must verify their IITR

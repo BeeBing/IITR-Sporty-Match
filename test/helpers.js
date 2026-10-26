@@ -13,12 +13,12 @@ function fakeMailer(enabled) {
 }
 
 // Boots the app on a random port against a freshly wiped database.
-async function startApp({ mail = false } = {}) {
+async function startApp({ mail = false, feedbackEmail = null } = {}) {
   const pool = createPool(DB_URL);
   await pool.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
   await migrate(pool);
   const mailer = fakeMailer(mail);
-  const app = createApp({ pool, mailer, sessionSecret: 'test-secret' });
+  const app = createApp({ pool, mailer, sessionSecret: 'test-secret', feedbackEmail });
   const server = await new Promise((resolve) => {
     const s = app.listen(0, () => resolve(s));
   });

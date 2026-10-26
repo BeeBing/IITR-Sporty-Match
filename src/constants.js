@@ -63,8 +63,15 @@ const SKILLS = [
 
 const MATCH_SKILLS = [{ key: 'any', label: 'All levels welcome' }, ...SKILLS];
 
+const FEEDBACK_TOPICS = [
+  { key: 'code', label: 'Code issue' },
+  { key: 'feature', label: 'Feature issue' },
+  { key: 'performance', label: 'Performance issue' },
+  { key: 'other', label: 'Other' },
+];
+
 const DURATIONS = [30, 45, 60, 90, 120, 180];
 
 const label = (list, key) => (list.find((x) => x.key === key) || { label: key }).label;
 
-module.exports = { DEPARTMENTS, YEARS, GENDERS, GENDER_PREFS, SKILLS, MATCH_SKILLS, DURATIONS, label };
+module.exports = { DEPARTMENTS, YEARS, GENDERS, GENDER_PREFS, SKILLS, MATCH_SKILLS, DURATIONS, FEEDBACK_TOPICS, label };

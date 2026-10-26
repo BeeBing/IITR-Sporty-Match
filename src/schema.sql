@@ -98,3 +98,18 @@ CREATE TABLE IF NOT EXISTS avatars (
 -- Login codes. The purpose check is (re)declared here so databases created before it update too.
 ALTER TABLE email_codes DROP CONSTRAINT IF EXISTS email_codes_purpose_check;
 ALTER TABLE email_codes ADD CONSTRAINT email_codes_purpose_check CHECK (purpose IN ('verify', 'reset', 'login'));
+
+-- Feedback from the "Send feedback" form. Kept even when email is off, and emailed to the
+-- private FEEDBACK_EMAIL address once it can be (emailed_at stays NULL until then).
+CREATE TABLE IF NOT EXISTS feedback (
+  id          SERIAL PRIMARY KEY,
+  user_id     INT  REFERENCES users(id) ON DELETE SET NULL,
+  topic       TEXT NOT NULL CHECK (topic IN ('code', 'feature', 'performance', 'other')),
+  message     TEXT NOT NULL,
+  reply_email TEXT,
+  page        TEXT,
+  user_agent  TEXT,
+  emailed_at  TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS feedback_pending_idx ON feedback (id) WHERE emailed_at IS NULL;

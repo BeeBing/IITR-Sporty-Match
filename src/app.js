@@ -9,7 +9,7 @@ const { loadUser, csrf, flash, requireAuth } = require('./middleware');
 const helpers = require('./view-helpers');
 const { appUrl } = require('./services/notify');
 
-function createApp({ pool, mailer, sessionSecret, production = false }) {
+function createApp({ pool, mailer, sessionSecret, production = false, feedbackEmail = null }) {
   const app = express();
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, '..', 'views'));
@@ -76,6 +76,7 @@ function createApp({ pool, mailer, sessionSecret, production = false }) {
   app.use(require('./routes/auth')({ pool, mailer }));
   app.use(require('./routes/account')({ pool, requireAuth: auth }));
   app.use(require('./routes/matches')({ pool, mailer, requireAuth: auth }));
+  app.use(require('./routes/feedback')({ pool, mailer, feedbackEmail }));
 
   app.use((req, res) => {
     res.status(404).render('error', { title: 'Not found', message: 'That page does not exist.' });

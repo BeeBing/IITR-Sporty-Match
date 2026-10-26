@@ -357,3 +357,6 @@ img.avatar { object-fit: cover; background: var(--surface-2); padding: 0; }
 .alt-login > summary::-webkit-details-marker { display: none; }
 .alt-login[open] > summary { color: var(--muted); }
 .alt-login > .form { margin-top: 4px; }
+
+/* Feedback: hidden trap field for bots */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }

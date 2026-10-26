@@ -1,0 +1,41 @@
+<%- include('partials/head') %>
+<div class="narrow">
+  <h1>Send us feedback</h1>
+  <p class="muted">Found a bug, something slow, or have an idea? Tell us.</p>
+  <form method="post" action="/feedback" class="card form" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
+    <input type="hidden" name="from" value="<%= values.from %>">
+    <div class="hp" aria-hidden="true"><label>Leave this empty <input name="website" tabindex="-1" autocomplete="off"></label></div>
+
+    <fieldset class="field">
+      <legend>Topic</legend>
+      <div class="segmented">
+        <% for (const t of topics) { %>
+          <label><input type="radio" name="topic" value="<%= t.key %>" <%= values.topic === t.key ? 'checked' : '' %> required><span><%= t.label %></span></label>
+        <% } %>
+      </div>
+      <% if (errors.topic) { %><p class="err"><%= errors.topic %></p><% } %>
+    </fieldset>
+
+    <div class="field">
+      <label for="message">Your feedback</label>
+      <textarea id="message" name="message" rows="6" maxlength="2000" required placeholder="What happened, and what did you expect? Steps to reproduce help a lot."><%= values.message %></textarea>
+      <% if (errors.message) { %><p class="err"><%= errors.message %></p><% } %>
+    </div>
+
+    <% if (!currentUser) { %>
+      <div class="field">
+        <label for="reply_email">Your email <span class="hint-inline">(optional, if you’d like a reply)</span></label>
+        <input id="reply_email" name="reply_email" type="email" autocomplete="email" maxlength="120" value="<%= values.reply_email %>">
+        <% if (errors.reply_email) { %><p class="err"><%= errors.reply_email %></p><% } %>
+      </div>
+    <% } %>
+
+    <p class="hint">
+      <% if (currentUser) { %>Your name and IITR email are included so we can reply.<% } %>
+      To help us fix issues, we also include the page you came from and your browser type.
+    </p>
+    <button class="btn btn-lg btn-block" type="submit">Send feedback</button>
+  </form>
+</div>
+<%- include('partials/foot') %>

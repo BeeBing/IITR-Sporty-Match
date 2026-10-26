@@ -1,6 +1,7 @@
 </main>
 <footer class="footer">
   <p>Made for IIT Roorkee · Show up on time, play fair, have fun.</p>
+  <p><a href="/feedback?from=<%= encodeURIComponent(path) %>">Send us feedback</a></p>
   <% if (currentUser) { %>
     <form method="post" action="/logout">
       <input type="hidden" name="_csrf" value="<%= csrfToken() %>">

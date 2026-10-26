@@ -29,6 +29,7 @@ Matchmaking for sports at IIT Roorkee. Post a match, wait for people to tap **â€
 - **Live match page.** The roster refreshes on its own. Players in the match can see each other's email and WhatsApp, and get a private match chat, WhatsApp share, and add-to-calendar.
 - **Notifications** when someone joins or leaves your match, when it fills ("Game on!"), when it's cancelled, on new chat messages, and when someone posts a match in a sport you play.
 - **Profile** with sports and a self-rated level for each, which teammates see on the match page.
+- **Feedback form** ("Send us feedback" in the footer) with topics: code issue, feature issue, performance issue, other. Messages are saved and emailed to a private address set on the server.
 - **Profile photo** picked from the phone's gallery or camera, cropped to a circle in the browser (drag, pinch or slider to zoom). The server re-encodes it to a small WebP, which strips hidden metadata such as GPS location. Photos are stored in Postgres and only shown to signed-in students.
 - **Email login codes** (needs email set up). Students log in with a 6-digit code sent to their IITR inbox; password login stays as a fallback. Email also turns on verification at sign-up, password reset, and a "your match is full" email.
 
@@ -66,6 +67,7 @@ The test suite wipes the test database on every run.
 | `MAIL_FROM` | with Brevo | Sender, e.g. `IITR Sporty Match <hello@yourdomain.in>`; must be a sender verified in Brevo |
 | `SMTP_URL` | no | Alternative to Brevo on paid plans or locally. Render's free plan blocks outbound SMTP |
 | `ALLOWED_EMAIL_DOMAIN` | no | Defaults to `iitr.ac.in` |
+| `FEEDBACK_EMAIL` | no | Where "Send us feedback" messages are emailed. Kept out of the code so it's never shown publicly; feedback is saved in the database either way |
 
 Without email set up, accounts are trusted at sign-up: the email format is checked, but nobody proves they own the inbox, and login is password-only. Set up email before sharing the app widely. For reliable delivery to IITR inboxes, send from your own domain authenticated in Brevo; Gmail addresses can't be authenticated as senders.
 

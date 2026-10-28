@@ -97,7 +97,14 @@ module.exports = function matchRoutes({ pool, mailer, requireAuth }) {
 
   r.get('/matches/:id', async (req, res) => {
     const data = await matches.get(pool, matchId(req), req.user);
-    res.render('matches/show', { title: `${getSport(data.match.sport)?.name || 'Match'}`, ...data, version: liveVersion(data) });
+    const { rows: stats } = data.match.joined
+      ? await pool.query(
+        `SELECT s.id, s.duration_sec, s.created_at, u.name FROM court_stats s JOIN users u ON u.id = s.user_id
+         WHERE s.match_id = $1 ORDER BY s.created_at`,
+        [data.match.id],
+      )
+      : { rows: [] };
+    res.render('matches/show', { title: `${getSport(data.match.sport)?.name || 'Match'}`, ...data, stats, version: liveVersion(data) });
   });
 
   // Polled by the match page; 204 when nothing changed.

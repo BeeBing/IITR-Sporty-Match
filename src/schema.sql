@@ -113,3 +113,16 @@ CREATE TABLE IF NOT EXISTS feedback (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS feedback_pending_idx ON feedback (id) WHERE emailed_at IS NULL;
+
+-- Court stats sessions recorded with the phone camera. Only numbers are stored, never video.
+CREATE TABLE IF NOT EXISTS court_stats (
+  id           SERIAL PRIMARY KEY,
+  user_id      INT  NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  match_id     INT  REFERENCES matches(id) ON DELETE SET NULL,
+  court        TEXT NOT NULL,
+  duration_sec INT  NOT NULL,
+  players      JSONB NOT NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS court_stats_user_idx ON court_stats (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS court_stats_match_idx ON court_stats (match_id);

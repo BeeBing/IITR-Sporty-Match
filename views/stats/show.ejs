@@ -1,0 +1,41 @@
+<%- include('../partials/head') %>
+<%
+  const mins = Math.floor(s.duration_sec / 60), secs = s.duration_sec % 60;
+  const length = `${mins}:${String(secs).padStart(2, '0')}`;
+  const L = court.length, W = court.width;
+%>
+<div class="st-wrap">
+  <% if (match) { %><a class="back" href="/matches/<%= match.id %>">← Back to the match</a><% } else { %><a class="back" href="/stats">← Court stats</a><% } %>
+  <h1>Court stats</h1>
+  <p class="muted"><%= court.name %> · <%= length %> tracked · <%= when(s.created_at) %> · recorded by <%= s.recorded_by %></p>
+
+  <div class="st-players">
+    <% s.players.forEach((p) => { const color = COLORS[(Number(p.label.slice(1)) - 1) % COLORS.length]; %>
+      <section class="card st-player">
+        <h2><span class="st-dot" style="background: <%= color %>"></span><%= p.label %></h2>
+        <div class="st-big"><%= p.distance.toFixed(1) %> <small>m covered</small></div>
+        <% if (s.duration_sec > 0) { %><p class="muted">Average <%= (p.distance / s.duration_sec).toFixed(2) %> m/s</p><% } %>
+        <% if (court.swings) { %>
+          <dl class="st-swings">
+            <div><dt>Overhead</dt><dd><%= p.swings.overhead %></dd></div>
+            <div><dt>Drive</dt><dd><%= p.swings.drive %></dd></div>
+            <div><dt>Lift / net</dt><dd><%= p.swings.underarm %></dd></div>
+          </dl>
+        <% } %>
+        <svg class="st-heat" viewBox="-0.3 -0.3 <%= W + 0.6 %> <%= L + 0.6 %>" role="img" aria-label="Where <%= p.label %> spent their time on court">
+          <rect x="0" y="0" width="<%= W %>" height="<%= L %>" fill="#14532d"/>
+          <% p.heat.forEach((row, r) => row.forEach((v, c) => { if (!v) return; %>
+            <% const top = Math.min(r + 1, L); %>
+            <rect x="<%= c %>" y="<%= (L - top).toFixed(2) %>" width="<%= (Math.min(c + 1, W) - c).toFixed(2) %>" height="<%= (top - r).toFixed(2) %>" fill="<%= color %>" fill-opacity="<%= (0.15 + 0.75 * v / 100).toFixed(2) %>"/>
+          <% })); %>
+          <% for (const [a, b] of lines) { %>
+            <line x1="<%= a[0] %>" y1="<%= L - a[1] %>" x2="<%= b[0] %>" y2="<%= L - b[1] %>" stroke="#fff" stroke-opacity="0.75" stroke-width="0.05"/>
+          <% } %>
+        </svg>
+        <p class="hint">Far end at the top. Brighter = more time spent there.</p>
+      </section>
+    <% }) %>
+  </div>
+  <p class="hint">Recorded with a phone camera: distances and positions are estimates, and swings are estimated from arm speed.</p>
+</div>
+<%- include('../partials/foot') %>

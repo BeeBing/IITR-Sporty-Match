@@ -1,0 +1,68 @@
+<%- include('../partials/head') %>
+<div class="st-wrap">
+  <h1>Court stats <span class="pill pill-open">Beta</span></h1>
+  <p class="muted">Put your phone on a stand behind the court, mark the four corners, and get each player’s distance, a live court map and swing counts. The video never leaves your phone: only the final numbers are saved, and only if you choose to.</p>
+
+  <% if (match) { const ms = getSport(match.sport), mf = getFormat(match.sport, match.format); %>
+    <p class="card nudge">Recording for <b><%= ms ? ms.name : match.sport %><%= mf ? ` · ${mf.label}` : '' %></b> at <%= match.venue %>, <%= when(match.starts_at) %>.</p>
+  <% } %>
+
+  <div id="stats-app" data-csrf="<%= csrfToken() %>" data-match="<%= match ? match.id : '' %>" data-sport="<%= match ? match.sport : '' %>">
+    <section class="card form" id="st-setup">
+      <div class="field">
+        <label for="st-court">Court</label>
+        <select id="st-court"></select>
+      </div>
+      <div class="st-sources">
+        <button class="btn btn-lg" type="button" id="st-camera">📷 Use the camera</button>
+        <label class="btn btn-lg btn-ghost" for="st-file">🎞️ Analyse a video</label>
+        <input id="st-file" type="file" accept="video/*" hidden>
+      </div>
+      <ul class="st-tips">
+        <li>Film from behind a baseline, as high as you can, with the whole court in view.</li>
+        <li>Keep the phone still. A stand, a bottle or a bag works.</li>
+        <li>The first time, it downloads about 25 MB of tracking models, so Wi-Fi helps.</li>
+      </ul>
+      <noscript><p class="err">Court stats needs JavaScript.</p></noscript>
+    </section>
+
+    <section id="st-live" hidden>
+      <div class="st-stage" id="st-stage">
+        <video id="st-video" playsinline muted></video>
+        <canvas id="st-hud" aria-label="Court view. Tap the court corners here."></canvas>
+      </div>
+      <p class="st-status" id="st-status" aria-live="polite"></p>
+      <progress id="st-progress" hidden></progress>
+      <div class="action-row">
+        <button class="btn btn-ghost" type="button" id="st-redo">Redo corners</button>
+        <button class="btn" type="button" id="st-start" disabled>Start</button>
+        <button class="btn btn-ghost" type="button" id="st-pause" hidden>Pause</button>
+        <button class="btn" type="button" id="st-finish" hidden>Finish</button>
+      </div>
+      <p class="hint center">Distances and positions are estimates. Swings are estimated from arm speed; shuttle speed isn’t measured.</p>
+    </section>
+
+    <section class="card" id="st-summary" hidden>
+      <h2>Session summary</h2>
+      <div id="st-summary-body"></div>
+      <div class="action-row">
+        <button class="btn" type="button" id="st-save">Save stats</button>
+        <button class="btn btn-ghost" type="button" id="st-discard">Discard</button>
+      </div>
+    </section>
+  </div>
+
+  <% if (recent.length) { %>
+    <h2>Your saved sessions</h2>
+    <ul class="notes-list card">
+      <% for (const s of recent) { %>
+        <li><a href="/stats/<%= s.id %>">
+          <span class="note-ico" aria-hidden="true">📊</span>
+          <span class="note-body"><%= COURTS[s.court] ? COURTS[s.court].name : s.court %><small><%= when(s.created_at) %> · <%= Math.round(s.duration_sec / 60) %> min</small></span>
+        </a></li>
+      <% } %>
+    </ul>
+  <% } %>
+</div>
+<script type="module" src="/stats/app.mjs"></script>
+<%- include('../partials/foot') %>

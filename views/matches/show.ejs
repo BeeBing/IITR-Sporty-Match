@@ -36,6 +36,16 @@
 </div>
 
 <% if (match.joined) { %>
+  <section class="card st-match">
+    <h3>📹 Court stats <span class="pill pill-open">Beta</span></h3>
+    <p class="muted">Film the game on a phone to get each player’s distance, a court map and swing counts.</p>
+    <% if (stats.length) { %>
+      <ul class="st-match-list">
+        <% for (const st of stats) { %><li><a href="/stats/<%= st.id %>">📊 <%= Math.max(1, Math.round(st.duration_sec / 60)) %> min session</a> <span class="muted">by <%= firstName(st.name) %>, <%= when(st.created_at) %></span></li><% } %>
+      </ul>
+    <% } %>
+    <a class="btn btn-sm" href="/stats?match=<%= match.id %>">Record stats</a>
+  </section>
   <form method="post" action="/matches/<%= match.id %>/messages" class="chat-form" id="chat-form">
     <input type="hidden" name="_csrf" value="<%= csrfToken() %>">
     <input name="body" maxlength="500" autocomplete="off" placeholder="Message the players… e.g. “I’ll bring the shuttles”" required aria-label="Message">

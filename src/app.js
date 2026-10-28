@@ -22,9 +22,18 @@ function createApp({ pool, mailer, sessionSecret, production = false, feedbackEm
         upgradeInsecureRequests: production ? [] : null,
         // blob: lets the photo cropper preview a picked image before uploading it.
         imgSrc: ["'self'", 'data:', 'blob:'],
+        // Court stats runs MediaPipe (WebAssembly) on the device and can play a picked video.
+        scriptSrc: ["'self'", "'wasm-unsafe-eval'"],
+        mediaSrc: ["'self'", 'blob:'],
+        workerSrc: ["'self'", 'blob:'],
       },
     },
   }));
+  // Court stats: the MediaPipe runtime straight from its npm package, and the bundled models.
+  // Both are large and only change with a deploy, so phones may cache them for a month.
+  const longCache = { maxAge: production ? '30d' : 0 };
+  app.use('/vendor/mediapipe', express.static(path.join(__dirname, '..', 'node_modules', '@mediapipe', 'tasks-vision'), longCache));
+  app.use('/models', express.static(path.join(__dirname, '..', 'public', 'models'), longCache));
   app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: production ? '1h' : 0 }));
 
   app.get('/healthz', async (req, res) => {
@@ -77,6 +86,7 @@ function createApp({ pool, mailer, sessionSecret, production = false, feedbackEm
   app.use(require('./routes/account')({ pool, requireAuth: auth }));
   app.use(require('./routes/matches')({ pool, mailer, requireAuth: auth }));
   app.use(require('./routes/feedback')({ pool, mailer, feedbackEmail }));
+  app.use(require('./routes/stats')({ pool, requireAuth: auth }));
 
   app.use((req, res) => {
     res.status(404).render('error', { title: 'Not found', message: 'That page does not exist.' });

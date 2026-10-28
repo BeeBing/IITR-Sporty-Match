@@ -360,3 +360,34 @@ img.avatar { object-fit: cover; background: var(--surface-2); padding: 0; }
 
 /* Feedback: hidden trap field for bots */
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Court stats */
+.st-wrap { max-width: 900px; margin: 0 auto; }
+.st-sources { display: flex; gap: 10px; flex-wrap: wrap; }
+.st-sources .btn { flex: 1 1 200px; }
+.st-tips { margin: 0; padding-left: 18px; color: var(--muted); font-size: 0.9rem; display: grid; gap: 4px; }
+.st-stage { position: relative; margin: 8px auto 0; background: #000; border-radius: 12px; overflow: hidden; max-width: 100%; }
+.st-stage video, .st-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.st-stage video { object-fit: fill; }
+.st-stage canvas { touch-action: manipulation; cursor: crosshair; }
+.st-status { text-align: center; font-weight: 600; margin: 10px 0 6px; min-height: 1.5em; }
+#st-progress { display: block; width: 100%; margin: 6px 0; accent-color: var(--brand); }
+.st-table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; }
+.st-table th, .st-table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+.st-table th { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.st-table td:first-child { font-weight: 800; }
+.st-players { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-top: 12px; }
+.st-player h2 { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+.st-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.st-big { font-size: 2rem; font-weight: 800; line-height: 1.1; }
+.st-big small { font-size: 0.9rem; font-weight: 600; color: var(--muted); }
+.st-swings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0; }
+.st-swings div { background: var(--surface-2); border-radius: 10px; padding: 6px 8px; text-align: center; }
+.st-swings dt { font-size: 0.72rem; color: var(--muted); font-weight: 700; }
+.st-swings dd { margin: 0; font-size: 1.2rem; font-weight: 800; }
+.st-heat { display: block; width: 100%; max-width: 180px; margin: 8px auto 4px; border-radius: 6px; }
+.st-match { margin-top: 16px; }
+.st-match-list { list-style: none; padding: 0; margin: 0 0 10px; display: grid; gap: 4px; }
+.st-promo { display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit; margin: 4px 0 8px; }
+.st-promo:hover { border-color: var(--brand); }
+.st-promo-ico { font-size: 1.8rem; }
